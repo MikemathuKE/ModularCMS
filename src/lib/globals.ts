@@ -9,3 +9,8 @@ export interface CommonProps {
 }
 
 export const TAB_WIDTH: number = 701;
+
+export interface TableColumn {
+  key: string;
+  label: string;
+}

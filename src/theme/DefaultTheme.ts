@@ -1,3 +1,4 @@
+import { NavItem, PaginationWrapper } from "@/components/LayoutComponents";
 import type { AppTheme } from "@/lib/DynamicStyles";
 
 export const defaultTheme: AppTheme = {
@@ -342,6 +343,7 @@ export const defaultTheme: AppTheme = {
       alignContent: "center",
       alignItems: "center",
       textAlign: "center",
+      cursor: "default",
     },
     TableCell: {
       padding: "0.75rem",
@@ -350,6 +352,36 @@ export const defaultTheme: AppTheme = {
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
+    },
+    TableWrapper: {
+      width: "100%",
+      borderCollapse: "collapse",
+    },
+    PaginationWrapper: {
+      marginTop: "1rem",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    PageButton: {
+      padding: "0.2rem 0.5rem",
+      backgroundColor: "#f5f5f5",
+      border: "1px solid #ccc",
+      cursor: "pointer",
+      borderRadius: "4px",
+      transition: "background 0.3s ease",
+    },
+    TableHead: {
+      backgroundColor: "#f1f1f1",
+      color: "#333",
+      fontWeight: "bold",
+      fontSize: "1rem",
+      textAlign: "left",
+      borderBottom: "2px solid #ccc",
+    },
+    TableBody: {
+      fontSize: "0.95rem",
+      color: "#444",
     },
     Heading: {
       fontSize: "1.25rem",
@@ -504,14 +536,13 @@ export const defaultTheme: AppTheme = {
       alignItems: "center",
       justifyContent: "space-between",
       backgroundColor: "#0f172a", // Gray-800
-      padding: "0.75rem 1.5rem",
       color: "#f1f5f9",
       height: "3.5rem",
       boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
       position: "fixed",
       top: "0",
       width: "100%",
-      zIndex: 1000,
+      zIndex: 1001,
       flexShrink: 0,
       textAlign: "center",
       overflow: "hidden",
@@ -583,19 +614,30 @@ export const defaultTheme: AppTheme = {
     Menu: {
       display: "flex",
       flexDirection: "column",
-      backgroundColor: "#ffffff",
+      backgroundColor: "transparent",
       borderRadius: "0.375rem",
       boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
       padding: "0.5rem 0",
-      minWidth: "12rem",
       color: "inherit",
+      cursor: "pointer",
+      position: "relative",
     },
 
     MenuList: {
       listStyle: "none",
-      padding: "0",
       margin: "0",
       color: "inherit",
+      position: "absolute",
+      top: "100%",
+      right: 0,
+      backgroundColor: "#ffffff",
+      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+      borderRadius: "0.375rem",
+      marginTop: "0.5rem",
+      padding: "0",
+      minWidth: "10rem",
+      zIndex: 1001,
+      visibility: "visible",
     },
 
     MenuItem: {
@@ -604,6 +646,7 @@ export const defaultTheme: AppTheme = {
       color: "#374151", // Gray-700
       cursor: "pointer",
       transition: "background-color 0.2s ease-in-out",
+      whiteSpace: "nowrap",
     },
 
     SideNavigation: {
@@ -626,8 +669,50 @@ export const defaultTheme: AppTheme = {
       zIndex: 1050,
       padding: "1rem",
       transform: "translateX(-100%)",
-      transition: "transform 0.3s ease-in-out",
       color: "inherit",
+    },
+    MenuNavbar: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      backgroundColor: "transparent",
+      padding: "0.75rem",
+      color: "#ffffff",
+      height: "3.5rem",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      position: "fixed",
+      top: 0,
+      right: 0,
+      width: "auto",
+      overflow: "none",
+      zIndex: 1000,
+      flexShrink: 0,
+      flex: 1,
+    },
+    Navbar: {
+      display: "flex",
+      alignItems: "right",
+      justifyContent: "flex-end",
+      backgroundColor: "transparent",
+      padding: "0.75rem",
+      color: "#ffffff",
+      height: "3.5rem",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      position: "relative",
+      top: 0,
+      right: 0,
+      width: "auto",
+      overflow: "none",
+      zIndex: 1000,
+      flexShrink: 0,
+      flex: 1,
+    },
+    NavItem: {
+      padding: "0.5rem",
+    },
+    Logo: {
+      backgroundColor: "transparent",
+      width: "auto",
     },
   },
 };

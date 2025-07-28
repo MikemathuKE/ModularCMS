@@ -3,6 +3,7 @@
 import React from "react";
 import NextImage from "next/image";
 import { createStyledComponent } from "@/lib/DynamicStyles";
+import { CommonProps } from "@/lib/globals";
 
 export interface AudioProps
   extends React.AudioHTMLAttributes<HTMLAudioElement> {
@@ -38,7 +39,7 @@ export const VideoMedia = createStyledComponent<VideoProps>(
   "Video"
 );
 
-export interface ImageProps {
+export interface ImageProps extends CommonProps {
   src: string;
   alt: string;
   width?: number;

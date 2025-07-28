@@ -7,11 +7,15 @@ import {
   Sidebar,
   Info,
   Footer,
+  NavigationDrawer,
+  SideNavigation,
+  Logo,
 } from "@/components/LayoutComponents";
 import { useTheme } from "@/lib/DynamicStyles";
 import { TAB_WIDTH } from "@/lib/globals";
 import Link from "next/link";
 import { Span } from "@/components/GeneralComponents";
+import ExampleNavbar from "@/examples/NavbarExample";
 
 export default function ThemeLayout({
   children,
@@ -49,16 +53,38 @@ export default function ThemeLayout({
   const theme = useTheme();
   return (
     <PageContainer>
-      <Topbar toggleSideBar={SetShowSidebar} showSideBar={showSidebar}></Topbar>
+      <Topbar>
+        <Logo toggleSideBar={SetShowSidebar} showSideBar={showSidebar}>
+          Logo
+        </Logo>
+        <ExampleNavbar />
+      </Topbar>
       <Main>
         <Sidebar
-          visibility={showSidebar ? "visible" : "hidden"}
+          visibility={
+            showSidebar && windowDimensions.width >= TAB_WIDTH
+              ? "visible"
+              : "hidden"
+          }
           style={{
             height: windowDimensions.width < TAB_WIDTH ? "auto" : "100%",
           }}
         >
-          Sidebar
+          <SideNavigation title="NavTitle" textColor="white">
+            <Link href="/home">Home</Link>
+            <Link href="/about">About</Link>
+          </SideNavigation>
         </Sidebar>
+        <NavigationDrawer
+          isOpen={showSidebar && windowDimensions.width < TAB_WIDTH}
+          toggleSidebar={SetShowSidebar}
+          position="left"
+        >
+          <SideNavigation title="NavTitle">
+            <Link href="/home">Home</Link>
+            <Link href="/about">About</Link>
+          </SideNavigation>
+        </NavigationDrawer>
         <Info
           style={{
             marginLeft:

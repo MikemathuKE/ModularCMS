@@ -3,12 +3,12 @@
 import React from "react";
 
 import ExampleForm from "@/examples/FormExample";
-import { Heading2, Paragraph, Heading3 } from "@/components/GeneralComponents";
+import { Heading2, Paragraph } from "@/components/GeneralComponents";
 
 import { Section, Card } from "@/components/LayoutComponents";
-import { ImageMedia } from "@/components/MediaComponents";
 import ExampleGrid from "@/examples/GridExample";
 import ExampleMedia from "@/examples/MediaExample";
+import { ExampleTable } from "@/examples/TableExample";
 
 const Layout = () => {
   return (
@@ -22,6 +22,10 @@ const Layout = () => {
 
       <Section>
         <ExampleGrid />
+      </Section>
+
+      <Section>
+        <ExampleTable />
       </Section>
 
       <Section>
