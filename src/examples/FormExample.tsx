@@ -15,6 +15,7 @@ import {
   SelectInput,
   TextArea,
   FieldWrapper,
+  Option,
 } from "@/components/FormElements";
 import { Button, Heading3 } from "@/components/GeneralComponents";
 
@@ -181,10 +182,10 @@ export default function ExampleForm() {
 
       <FieldWrapper label="Role">
         <SelectInput name="role" value={data.role} onChange={handleChange}>
-          <option value="">--Select--</option>
-          <option value="admin">Admin</option>
-          <option value="editor">Editor</option>
-          <option value="viewer">Viewer</option>
+          <Option value="">--Select--</Option>
+          <Option value="admin">Admin</Option>
+          <Option value="editor">Editor</Option>
+          <Option value="viewer">Viewer</Option>
         </SelectInput>
       </FieldWrapper>
 

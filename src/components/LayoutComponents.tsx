@@ -6,7 +6,7 @@ import { Button, Heading4, Span } from "./GeneralComponents";
 import Link from "next/link";
 import { TableColumn } from "@/lib/globals";
 
-interface CustomChildrenProps extends CommonProps {
+export interface CustomChildrenProps extends CommonProps {
   children?: React.ReactNode;
 }
 
@@ -17,7 +17,7 @@ export const PageContainer = createStyledComponent<CustomChildrenProps>(
   "PageContainer"
 );
 
-interface SidebarProps extends CustomChildrenProps {
+export interface SidebarProps extends CustomChildrenProps {
   visibility?: string | "visible" | "hidden";
 }
 
@@ -31,18 +31,18 @@ export const Sidebar = createStyledComponent<SidebarProps>(
   })
 );
 
-interface SidebarProps extends CustomChildrenProps {
+export interface TopbarProps extends CustomChildrenProps {
   visibility?: string | "visible" | "hidden";
 }
 
-export const Topbar = createStyledComponent<SidebarProps>(
-  ({ children, ...props }: SidebarProps) => {
+export const Topbar = createStyledComponent<TopbarProps>(
+  ({ children, ...props }: TopbarProps) => {
     return <div {...props}>{children}</div>;
   },
   "Topbar"
 );
 
-interface LogoProps extends CustomChildrenProps {
+export interface LogoProps extends CustomChildrenProps {
   showSideBar?: boolean;
   toggleSideBar?: Dispatch<SetStateAction<boolean>>;
 }
@@ -162,7 +162,7 @@ export const Grid = createStyledComponent<CustomChildrenProps>(
   "Grid"
 );
 
-interface SideNavProps extends CustomChildrenProps {
+export interface SideNavProps extends CustomChildrenProps {
   title?: string;
   textColor?: string;
 }
@@ -182,7 +182,7 @@ export const SideNavigation = createStyledComponent<SideNavProps>(
   "SideNavigation"
 );
 
-interface NavigationDrawerProps extends CustomChildrenProps {
+export interface NavigationDrawerProps extends CustomChildrenProps {
   isOpen?: boolean;
   position?: "left" | "right";
   title?: string;
@@ -256,7 +256,7 @@ export const Navbar = createStyledComponent<CustomChildrenProps>(
   "Navbar"
 );
 
-interface NavItemProps extends CustomChildrenProps {
+export interface NavItemProps extends CustomChildrenProps {
   href: string;
 }
 
@@ -265,7 +265,7 @@ export const NavItem = createStyledComponent<NavItemProps>(
   "NavItem"
 );
 
-interface MenuProps extends CustomChildrenProps {
+export interface MenuProps extends CustomChildrenProps {
   title: string;
 }
 
@@ -284,7 +284,7 @@ export const Menu = createStyledComponent<MenuProps>(
   "Menu"
 );
 
-interface MenuListProps extends CustomChildrenProps {
+export interface MenuListProps extends CustomChildrenProps {
   visible?: boolean;
 }
 
@@ -314,7 +314,7 @@ export const PaginationWrapper = createStyledComponent<CustomChildrenProps>(
   "PaginationWrapper"
 );
 
-interface PageButtonProps extends CustomChildrenProps {
+export interface PageButtonProps extends CustomChildrenProps {
   disabled: boolean;
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -328,7 +328,7 @@ export const PageButton = createStyledComponent<PageButtonProps>(
 
 export const TableHead = createStyledComponent<CustomChildrenProps>(
   ({ children, ...props }: CustomChildrenProps) => (
-    <thead {...props}>{children}</thead>
+    <th {...props}>{children}</th>
   ),
   "TableHead"
 );
@@ -340,6 +340,13 @@ export const TableBody = createStyledComponent<CustomChildrenProps>(
   "TableBody"
 );
 
+export const TableHeader = createStyledComponent<CustomChildrenProps>(
+  ({ children, ...props }: CustomChildrenProps) => (
+    <thead {...props}>{children}</thead>
+  ),
+  "TableHeader"
+);
+
 export const TableRow = createStyledComponent<CustomChildrenProps>(
   ({ children, ...props }: CustomChildrenProps) => (
     <tr {...props}>{children}</tr>
@@ -347,7 +354,14 @@ export const TableRow = createStyledComponent<CustomChildrenProps>(
   "TableRow"
 );
 
-interface TableProps<T> extends CustomChildrenProps {
+export const TableData = createStyledComponent<CustomChildrenProps>(
+  ({ children, ...props }: CustomChildrenProps) => (
+    <td {...props}>{children}</td>
+  ),
+  "TableData"
+);
+
+export interface TableProps<T> extends CustomChildrenProps {
   data: T[];
   columns: TableColumn[];
   currentPage: number;
@@ -360,18 +374,18 @@ export const Table = createStyledComponent<TableProps<any>>(
     return (
       <div {...props}>
         <TableWrapper>
-          <TableHead>
+          <TableHeader>
             <TableRow>
               {columns.map((col: TableColumn) => (
-                <th key={col.key as string}>{col.label}</th>
+                <TableHead key={col.key as string}>{col.label}</TableHead>
               ))}
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {data.map((row, idx) => (
               <TableRow key={idx}>
                 {columns.map((col) => (
-                  <td key={col.key as string}>{row[col.key]}</td>
+                  <TableData key={col.key as string}>{row[col.key]}</TableData>
                 ))}
               </TableRow>
             ))}
@@ -398,7 +412,7 @@ export const Table = createStyledComponent<TableProps<any>>(
       </div>
     );
   },
-  "TableContainer",
+  "Table",
   {
     width: "100%",
     overflowX: "auto",

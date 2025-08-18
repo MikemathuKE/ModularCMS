@@ -54,9 +54,7 @@ export default function ThemeLayout({
   return (
     <PageContainer>
       <Topbar>
-        <Logo toggleSideBar={SetShowSidebar} showSideBar={showSidebar}>
-          Logo
-        </Logo>
+        <Logo toggleSideBar={SetShowSidebar} showSideBar={showSidebar}></Logo>
         <ExampleNavbar />
       </Topbar>
       <Main>
@@ -73,6 +71,7 @@ export default function ThemeLayout({
           <SideNavigation title="NavTitle" textColor="white">
             <Link href="/home">Home</Link>
             <Link href="/about">About</Link>
+            <Link href="/portfolio">Portfolio</Link>
           </SideNavigation>
         </Sidebar>
         <NavigationDrawer
@@ -83,6 +82,7 @@ export default function ThemeLayout({
           <SideNavigation title="NavTitle">
             <Link href="/home">Home</Link>
             <Link href="/about">About</Link>
+            <Link href="/portfolio">Portfolio</Link>
           </SideNavigation>
         </NavigationDrawer>
         <Info

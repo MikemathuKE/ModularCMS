@@ -22,14 +22,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const result = await response.json();
-    SetTheme(result as AppTheme);
+    if (Object.keys(result).length !== 0) {
+      SetTheme(result as AppTheme);
+    }
     return result;
   }
 
   // Effect Theme On Page Load
-  // useEffect(() => {
-  //   getTheme();
-  // }, []);
+  useEffect(() => {
+    getTheme();
+  }, []);
 
   return (
     <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>

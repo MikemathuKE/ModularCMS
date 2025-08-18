@@ -277,6 +277,18 @@ export const SelectInput = createStyledComponent<SelectInputProps>(
   "SelectInput"
 );
 
+export interface OptionProps extends CommonProps {
+  value?: string;
+  children: React.ReactNode;
+}
+
+export const Option = createStyledComponent<OptionProps>(
+  ({ value, children }: OptionProps) => (
+    <option value={value}>{children}</option>
+  ),
+  "Option"
+);
+
 export interface TextAreaProps extends CommonProps {
   name?: string;
   value?: string;

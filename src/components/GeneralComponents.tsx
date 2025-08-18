@@ -2,7 +2,7 @@
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
 
-interface TextProps extends CommonProps {
+export interface TextProps extends CommonProps {
   children: React.ReactNode;
 }
 

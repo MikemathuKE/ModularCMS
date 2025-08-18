@@ -1,4 +1,3 @@
-import { NavItem, PaginationWrapper } from "@/components/LayoutComponents";
 import type { AppTheme } from "@/lib/DynamicStyles";
 
 export const defaultTheme: AppTheme = {
@@ -376,7 +375,7 @@ export const defaultTheme: AppTheme = {
       color: "#333",
       fontWeight: "bold",
       fontSize: "1rem",
-      textAlign: "left",
+      textAlign: "center",
       borderBottom: "2px solid #ccc",
     },
     TableBody: {
