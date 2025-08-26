@@ -1,0 +1,31 @@
+import mongoose, { Schema, Document, Model } from "mongoose";
+
+export interface IPage extends Document {
+  name: string;
+  slug: string;
+  json: Record<string, any>;
+  status: "draft" | "published";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PageSchema = new Schema<IPage>(
+  {
+    name: { type: String, required: true, index: true },
+    slug: { type: String, required: true, unique: true, index: true },
+    json: { type: Object, default: { component: "", children: [] } },
+    status: {
+      type: String,
+      enum: ["draft", "published"],
+      default: "draft",
+      index: true,
+    },
+  },
+  { timestamps: true }
+);
+
+// Ensure indexes exist in Mongo
+PageSchema.index({ name: "text", slug: "text" }); // allows text search on both
+
+export const Page: Model<IPage> =
+  mongoose.models.Page || mongoose.model<IPage>("Page", PageSchema);

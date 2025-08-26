@@ -1,7 +1,8 @@
-// app/page.tsx
+// app/[slug]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
 
 interface PageData {
@@ -10,15 +11,16 @@ interface PageData {
   published: boolean;
 }
 
-export default function HomePage() {
+export default function PublicPage() {
+  const { slug } = useParams();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPage() {
       try {
-        const res = await fetch("/api/cms/pages/home");
-        if (!res.ok) throw new Error("Failed to fetch home page");
+        const res = await fetch(`/api/cms/pages/${slug}`);
+        if (!res.ok) throw new Error("Failed to fetch page data");
         const data: PageData = await res.json();
 
         if (!data.published) {
@@ -34,7 +36,7 @@ export default function HomePage() {
       }
     }
     fetchPage();
-  }, []);
+  }, [slug]);
 
   if (loading) {
     return (
@@ -47,9 +49,7 @@ export default function HomePage() {
   if (!pageData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg text-red-500">
-          Home page not found or not published
-        </p>
+        <p className="text-lg text-red-500">Page not found or not published</p>
       </div>
     );
   }
