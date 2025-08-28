@@ -136,7 +136,6 @@ export default function LayoutEditorTree() {
       return { ...node, children };
     };
     setRootNode(recursiveUpdate(rootNode, path));
-    console.log(rootNode);
   };
 
   const addChildNode = (component: string) => {
@@ -509,7 +508,6 @@ export default function LayoutEditorTree() {
           if (propName === "children" && !currentProps[propName]) {
             return null;
           }
-          console.log(propName);
 
           const currentValue = currentProps[propName] ?? defaultValue;
           const propType = typeof defaultValue;

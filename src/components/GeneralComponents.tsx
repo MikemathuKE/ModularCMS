@@ -78,3 +78,12 @@ export const Button = createStyledComponent<ButtonProps>(
   ({ children, ...props }) => <button {...props}>{children}</button>,
   "Button"
 );
+
+export interface StringProps extends CommonProps {
+  text: string;
+}
+
+export const Text = createStyledComponent<StringProps>(
+  ({ text }) => <>{text}</>,
+  "Text"
+);

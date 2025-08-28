@@ -7,6 +7,7 @@ interface Page {
   _id: string;
   name: string;
   slug: string;
+  layout: string;
   status: "draft" | "published"; // ✅ new field
   createdAt: string;
   updatedAt: string;
@@ -21,7 +22,6 @@ export default function PagesPage() {
       try {
         const res = await fetch("/api/cms/pages");
         const data = await res.json();
-        console.log(data);
         setPages(data.data);
       } catch (err) {
         console.error("Failed to fetch pages", err);

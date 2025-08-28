@@ -36,13 +36,14 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const { name, json, status } = body;
+    const { name, json, layout, status } = body;
 
     const page = await Page.findOneAndUpdate(
       { slug },
       {
         ...(name && { name }),
         ...(json && { json }),
+        ...(layout && { layout }),
         ...(status && { status }), // explicitly handle published/draft
       },
       { new: true }

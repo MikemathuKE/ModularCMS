@@ -3,10 +3,12 @@ import Link from "next/link";
 
 const navItems = [
   { name: "Dashboard", path: "/admin" },
+  { name: "Layout", path: "/admin/layout" },
   { name: "Pages", path: "/admin/pages" },
   { name: "Media", path: "/admin/media" },
   { name: "Content", path: "/admin/content" },
   { name: "Content Types", path: "/admin/content-types" },
+  { name: "Theme", path: "/admin/themes" },
   { name: "Settings", path: "/admin/settings" },
 ];
 

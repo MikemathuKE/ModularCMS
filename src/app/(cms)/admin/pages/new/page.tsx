@@ -15,7 +15,7 @@ export default function NewPage() {
       body: JSON.stringify({
         name,
         slug,
-        json: { component: "div", props: {}, children: [] },
+        json: { component: "", layout: "default", props: {}, children: [] },
       }),
     });
     router.push("/admin/pages");

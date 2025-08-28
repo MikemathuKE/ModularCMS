@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export default function PagePreview() {
   const { slug } = useParams();
@@ -48,7 +49,11 @@ export default function PagePreview() {
         <h1 className="text-2xl font-bold mb-4 text-gray-800">
           Preview: {slug}
         </h1>
-        <div className="prose max-w-none">{renderJSONNode(pageData.json)}</div>
+        <div className="prose max-w-none">
+          <ThemeProvider themeIdentifier={null}>
+            {renderJSONNode(pageData.json)}
+          </ThemeProvider>
+        </div>
       </div>
     </div>
   );

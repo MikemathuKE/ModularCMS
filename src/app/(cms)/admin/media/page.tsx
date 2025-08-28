@@ -15,18 +15,27 @@ interface Media {
 export default function MediaPage() {
   const [media, setMedia] = useState<Media[]>([]);
   const [loading, setLoading] = useState(false);
+  const [type, setType] = useState<"image" | "video" | "audio">("image");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   async function fetchMedia() {
     setLoading(true);
-    const res = await fetch("/api/cms/media");
+    const res = await fetch(
+      `/api/cms/media?type=${type}&page=${page}&search=${encodeURIComponent(
+        search
+      )}`
+    );
     const data = await res.json();
     setMedia(data.items);
+    setTotalPages(data.totalPages || 1);
     setLoading(false);
   }
 
   useEffect(() => {
     fetchMedia();
-  }, []);
+  }, [type, page, search]);
 
   async function handleUpload(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,6 +58,26 @@ export default function MediaPage() {
     <div className="p-6">
       <h1 className="text-xl font-bold mb-4">Media Registry</h1>
 
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6 border-b">
+        {["image", "video", "audio"].map((t) => (
+          <button
+            key={t}
+            onClick={() => {
+              setType(t as any);
+              setPage(1);
+            }}
+            className={`pb-2 border-b-2 ${
+              type === t
+                ? "border-blue-600 text-blue-600 font-semibold"
+                : "border-transparent"
+            }`}
+          >
+            {t.charAt(0).toUpperCase() + t.slice(1)}s
+          </button>
+        ))}
+      </div>
+
       {/* Upload Form */}
       <form
         onSubmit={handleUpload}
@@ -68,6 +97,20 @@ export default function MediaPage() {
           Upload
         </button>
       </form>
+
+      {/* Search */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder={`Search ${type}s...`}
+          value={search}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
+          className="border rounded px-3 py-2 w-full"
+        />
+      </div>
 
       {/* Media List */}
       {loading ? (
@@ -97,6 +140,27 @@ export default function MediaPage() {
           ))}
         </div>
       )}
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-4 mt-6">
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span>
+          Page {page} of {totalPages}
+        </span>
+        <button
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page === totalPages}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

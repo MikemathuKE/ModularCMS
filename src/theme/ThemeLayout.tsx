@@ -69,9 +69,9 @@ export default function ThemeLayout({
           }}
         >
           <SideNavigation title="NavTitle" textColor="white">
-            <Link href="/home">Home</Link>
-            <Link href="/about">About</Link>
-            <Link href="/portfolio">Portfolio</Link>
+            <Link href="">Home</Link>
+            <Link href="">About</Link>
+            <Link href="">Portfolio</Link>
           </SideNavigation>
         </Sidebar>
         <NavigationDrawer
@@ -80,9 +80,9 @@ export default function ThemeLayout({
           position="left"
         >
           <SideNavigation title="NavTitle">
-            <Link href="/home">Home</Link>
-            <Link href="/about">About</Link>
-            <Link href="/portfolio">Portfolio</Link>
+            <Link href="">Home</Link>
+            <Link href="">About</Link>
+            <Link href="">Portfolio</Link>
           </SideNavigation>
         </NavigationDrawer>
         <Info

@@ -64,12 +64,10 @@ export default function ExampleForm() {
       (target.type === "checkbox" || target.type === "radio")
     ) {
       const checked = target.checked;
-      console.log("Checked value:", checked);
     } else if (target.type === "file" && (target as HTMLInputElement).files) {
       fieldValue = (target as HTMLInputElement).files?.[0];
     } else {
       const value = target.value;
-      console.log("Value:", value);
     }
 
     if (fieldValue !== undefined) {
@@ -101,7 +99,6 @@ export default function ExampleForm() {
     e.preventDefault();
     if (!validate()) return;
 
-    console.log("Form submitted:", data);
     alert("Form submitted successfully!");
   };
 

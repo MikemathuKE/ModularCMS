@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { JSONNode } from "@/renderer/JsonRenderer";
 import { MetaComponentMap } from "@/renderer/metaComponentMap";
 import { renderJSONNode } from "@/renderer/JsonRenderer";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 interface ComponentCategory {
   name: string;
@@ -14,6 +15,10 @@ interface CollapsedState {
 }
 
 const componentCategories: ComponentCategory[] = [
+  {
+    name: "Data Components",
+    components: ["DataSection"],
+  },
   {
     name: "Layout Components",
     components: [
@@ -45,6 +50,7 @@ const componentCategories: ComponentCategory[] = [
       "Heading6",
       "Paragraph",
       "Span",
+      "Text",
     ],
   },
   {
@@ -94,6 +100,17 @@ export default function LayoutEditor({
   const [published, setPublished] = useState(false);
   const [pageName, setPageName] = useState<string>("");
 
+  const [layouts, setLayouts] = useState<string[]>([]);
+  const [selectedLayout, setSelectedLayout] = useState("default");
+
+  // fetch available layouts
+  useEffect(() => {
+    fetch("/api/cms/layouts")
+      .then((res) => res.json())
+      .then((data) => setLayouts(data.layouts || ["default"]))
+      .catch(() => setLayouts(["default"]));
+  }, []);
+
   // fetch content types
   useEffect(() => {
     fetch("/api/cms/contentTypes")
@@ -101,6 +118,12 @@ export default function LayoutEditor({
       .then((data) => setContentTypes(data))
       .catch(() => setContentTypes([]));
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setSaveMessage("");
+    }, 3000);
+  }, [saveMessage]);
 
   // fetch page details
   useEffect(() => {
@@ -219,7 +242,7 @@ export default function LayoutEditor({
               {isCollapsed ? "+" : "-"}
             </button>
           )}
-          <span className="font-mono">{node.component || "Empty"}</span>
+          <span className="font-mono">{node.component || "<Root>"}</span>
           {/* Controls */}
           {path.length > 0 && (
             <div className="ml-auto flex gap-1">
@@ -311,7 +334,11 @@ export default function LayoutEditor({
       const res = await fetch(`/api/cms/pages/${pageId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ json: rootNode, published }),
+        body: JSON.stringify({
+          json: rootNode,
+          published,
+          layout: selectedLayout,
+        }),
       });
       if (!res.ok) throw new Error("Failed to save");
       setSaveMessage("✅ Page saved successfully!");
@@ -328,7 +355,7 @@ export default function LayoutEditor({
       <div className="flex items-center justify-between px-4 py-2 border-b bg-white">
         <h1 className="font-semibold text-xl">
           Layout Editor{" "}
-          <span className="text-gray-500">({pageName || "..."})</span>
+          <span className="text-gray-500">({pageName + " page" || "..."})</span>
         </h1>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-2 text-sm">
@@ -338,6 +365,21 @@ export default function LayoutEditor({
               onChange={(e) => setPublished(e.target.checked)}
             />
             Published
+          </label>
+          {/* Layout selector */}
+          <label className="flex items-center gap-2 text-sm">
+            Layout:
+            <select
+              value={selectedLayout}
+              onChange={(e) => setSelectedLayout(e.target.value)}
+              className="border rounded p-1"
+            >
+              {layouts.map((layout) => (
+                <option key={layout} value={layout}>
+                  {layout}
+                </option>
+              ))}
+            </select>
           </label>
           <button
             onClick={savePage}
@@ -415,7 +457,9 @@ export default function LayoutEditor({
       <div className="bg-gray-200 p-2">
         <h2 className="font-semibold text-lg mb-2">Live Preview</h2>
         <div className="bg-white p-2 border rounded">
-          {renderJSONNode(rootNode)}
+          <ThemeProvider themeIdentifier={null}>
+            {renderJSONNode(rootNode)}
+          </ThemeProvider>
         </div>
       </div>
     </div>

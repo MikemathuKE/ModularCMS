@@ -31,6 +31,19 @@ export const Sidebar = createStyledComponent<SidebarProps>(
   })
 );
 
+export interface ALinkProps extends CommonProps {
+  href: string;
+}
+
+export const ALink = createStyledComponent<ALinkProps>(
+  ({ href, children, ...props }) => (
+    <Link href={href} {...props}>
+      {children}
+    </Link>
+  ),
+  "Link"
+);
+
 export interface TopbarProps extends CustomChildrenProps {
   visibility?: string | "visible" | "hidden";
 }

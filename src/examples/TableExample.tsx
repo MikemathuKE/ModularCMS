@@ -31,14 +31,14 @@ export const ExampleTable = () => {
   ]);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetch(`/api/users?page=${page}`)
-      .then((res) => res.json())
-      .then(({ users, totalPages }) => {
-        setData(users);
-        setTotalPages(totalPages);
-      });
-  }, [page]);
+  // useEffect(() => {
+  //   fetch(`/api/users?page=${page}`)
+  //     .then((res) => res.json())
+  //     .then(({ users, totalPages }) => {
+  //       setData(users);
+  //       setTotalPages(totalPages);
+  //     });
+  // }, [page]);
 
   return (
     <Table

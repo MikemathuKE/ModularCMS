@@ -29,6 +29,7 @@ import {
   TableRow,
   TableData,
   Table,
+  ALink,
 } from "@/components/LayoutComponents";
 
 import {
@@ -41,6 +42,7 @@ import {
   Heading6,
   Paragraph,
   Span,
+  Text,
 } from "@/components/GeneralComponents";
 
 import {
@@ -69,19 +71,37 @@ import {
   Option,
 } from "@/components/FormElements";
 
+import { DataSection } from "@/components/DataSection";
+
 interface ComponentMeta<T> {
   component: React.ComponentType<T>;
   props: Partial<T>;
 }
 
 export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
+  // Data Components
+  DataSection: {
+    component: DataSection,
+    props: {
+      contentType: "",
+      filters: {},
+      sort: {},
+      limit: null,
+      paginate: false,
+    },
+  },
   // Layout Components
+  Link: {
+    component: ALink,
+    props: {
+      href: "",
+    },
+  },
   PageContainer: {
     component: PageContainer,
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Topbar: {
@@ -89,7 +109,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       visibility: "visible",
     },
   },
@@ -98,7 +118,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Sidebar: {
@@ -106,7 +125,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       visibility: "visible",
     },
   },
@@ -115,7 +134,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Footer: {
@@ -123,7 +141,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   NavigationDrawer: {
@@ -131,7 +148,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       isOpen: true,
       position: "left",
       title: null,
@@ -143,7 +160,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       title: null,
       textColor: null,
     },
@@ -153,7 +170,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       showSideBar: false,
       toggleSideBar: null, // Should be set in editor
     },
@@ -163,7 +180,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Card: {
@@ -171,7 +187,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   CardContent: {
@@ -179,7 +194,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   CardHeader: {
@@ -187,7 +201,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   CardFooter: {
@@ -195,7 +208,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Grid: {
@@ -203,7 +215,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   MenuNav: {
@@ -211,7 +222,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Navbar: {
@@ -219,7 +229,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   NavItem: {
@@ -227,7 +236,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       href: "#", // Required but set to default
     },
   },
@@ -236,7 +245,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       title: "Menu", // Required but set to default
     },
   },
@@ -245,7 +254,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       visible: true,
     },
   },
@@ -254,7 +263,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   TableWrapper: {
@@ -262,7 +270,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   PaginationWrapper: {
@@ -270,7 +277,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   PageButton: {
@@ -278,7 +284,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: "Button",
       disabled: false,
       onClick: null, // Should be set in editor
     },
@@ -288,7 +293,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   TableBody: {
@@ -296,7 +300,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   TableHeader: {
@@ -304,7 +307,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   TableRow: {
@@ -312,7 +314,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   TableData: {
@@ -320,7 +321,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   Table: {
@@ -328,7 +328,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
+
       data: [],
       columns: [],
       currentPage: 1,
@@ -343,7 +343,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: "Button",
       type: "button",
       disabled: false,
       autoFocus: false,
@@ -373,7 +372,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 1"],
     },
   },
   Heading2: {
@@ -381,7 +379,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 2"],
     },
   },
   Heading3: {
@@ -389,7 +386,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 3"],
     },
   },
   Heading4: {
@@ -397,7 +393,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 4"],
     },
   },
   Heading5: {
@@ -405,7 +400,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 5"],
     },
   },
   Heading6: {
@@ -413,7 +407,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Heading 6"],
     },
   },
   Paragraph: {
@@ -421,7 +414,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Paragraph text"],
     },
   },
   Span: {
@@ -429,7 +421,12 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: ["Span text"],
+    },
+  },
+  Text: {
+    component: Text,
+    props: {
+      text: "Text",
     },
   },
 
@@ -500,7 +497,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       lang: null,
       dir: null,
       accessKey: null,
-      children: null,
     },
   },
   TextInput: {
@@ -667,7 +663,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       autoFocus: false,
       className: null,
       title: null,
-      children: null,
       onChange: null,
       onFocus: null,
       onBlur: null,
@@ -705,7 +700,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       style: null,
       label: null,
       error: null,
-      children: null,
     },
   },
   Label: {
@@ -714,7 +708,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       id: null,
       style: null,
       htmlFor: null,
-      children: ["Label"],
     },
   },
   FormGroup: {
@@ -722,7 +715,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      children: null,
     },
   },
   ErrorText: {
@@ -737,7 +729,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     component: Option,
     props: {
       value: null,
-      children: null,
     },
   },
 };

@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { name, slug, json, status } = body;
+    const { name, slug, layout, json, status } = body;
 
     if (!name || !slug) {
       return NextResponse.json(
@@ -88,6 +88,7 @@ export async function POST(req: Request) {
     const page = new Page({
       name,
       slug,
+      layout,
       json: json || { component: "", children: [] },
       status: status || "draft",
     });
