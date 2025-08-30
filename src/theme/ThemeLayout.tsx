@@ -10,10 +10,10 @@ import {
   NavigationDrawer,
   SideNavigation,
   Logo,
+  ALink,
 } from "@/components/LayoutComponents";
 import { useTheme } from "@/lib/DynamicStyles";
 import { TAB_WIDTH } from "@/lib/globals";
-import Link from "next/link";
 import { Span } from "@/components/GeneralComponents";
 import ExampleNavbar from "@/examples/NavbarExample";
 
@@ -69,9 +69,9 @@ export default function ThemeLayout({
           }}
         >
           <SideNavigation title="NavTitle" textColor="white">
-            <Link href="">Home</Link>
-            <Link href="">About</Link>
-            <Link href="">Portfolio</Link>
+            <ALink href="">Home</ALink>
+            <ALink href="">About</ALink>
+            <ALink href="">Portfolio</ALink>
           </SideNavigation>
         </Sidebar>
         <NavigationDrawer
@@ -80,9 +80,9 @@ export default function ThemeLayout({
           position="left"
         >
           <SideNavigation title="NavTitle">
-            <Link href="">Home</Link>
-            <Link href="">About</Link>
-            <Link href="">Portfolio</Link>
+            <ALink href="">Home</ALink>
+            <ALink href="">About</ALink>
+            <ALink href="">Portfolio</ALink>
           </SideNavigation>
         </NavigationDrawer>
         <Info
@@ -97,7 +97,7 @@ export default function ThemeLayout({
         </Info>
       </Main>
       <Footer>
-        <Link href={"https://github.com/MikemathuKE"}>
+        <ALink href={"https://github.com/MikemathuKE"}>
           <svg
             className="w-6 h-6 text-gray-800 dark:text-white"
             aria-hidden="true"
@@ -113,8 +113,8 @@ export default function ThemeLayout({
               clipRule="evenodd"
             />
           </svg>
-        </Link>
-        <Link href={"mailto:info@mikemathuke.com"}>
+        </ALink>
+        <ALink href={"mailto:info@mikemathuke.com"}>
           <svg
             className="w-6 h-6 text-gray-800 dark:text-white"
             aria-hidden="true"
@@ -132,8 +132,8 @@ export default function ThemeLayout({
               d="M11 16v-5.5A3.5 3.5 0 0 0 7.5 7m3.5 9H4v-5.5A3.5 3.5 0 0 1 7.5 7m3.5 9v4M7.5 7H14m0 0V4h2.5M14 7v3m-3.5 6H20v-6a3 3 0 0 0-3-3m-2 9v4m-8-6.5h1"
             />
           </svg>
-        </Link>
-        <Link href={"https://www.youtube.com/@MikemathuKE"}>
+        </ALink>
+        <ALink href={"https://www.youtube.com/@MikemathuKE"}>
           <svg
             className="w-6 h-6 text-gray-800 dark:text-white"
             aria-hidden="true"
@@ -149,8 +149,8 @@ export default function ThemeLayout({
               clipRule="evenodd"
             />
           </svg>
-        </Link>
-        <Link href={"https://www.instagram.com/mikemathuke/"}>
+        </ALink>
+        <ALink href={"https://www.instagram.com/mikemathuke/"}>
           <svg
             className="w-6 h-6 text-gray-800 dark:text-white"
             aria-hidden="true"
@@ -167,7 +167,7 @@ export default function ThemeLayout({
               clipRule="evenodd"
             />
           </svg>
-        </Link>
+        </ALink>
         <Span>© MikemathuKE</Span>
       </Footer>
     </PageContainer>

@@ -44,10 +44,18 @@ export default function EditContentPage() {
 
     switch (field.type) {
       case "string":
+        <input
+          type="text"
+          {...common}
+          value={formData[field.name] || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, [field.name]: e.target.value })
+          }
+          className="w-full px-3 py-2 border rounded"
+        />;
       case "text":
         return (
-          <input
-            type="text"
+          <textarea
             {...common}
             value={formData[field.name] || ""}
             onChange={(e) =>

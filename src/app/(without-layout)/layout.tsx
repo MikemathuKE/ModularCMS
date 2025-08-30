@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default async function RootLayout({
       <body>
         <div className="h-dvh wh-full flex bg-slate-800 overflow-hidden">
           <aside className="h-full top-0 fixed w-14 z-50 bg-slate-800 text-center align-center justify-center overflow-hidden group p-1 hover:w-50">
-            <a
+            <Link
               className="text-center w-full cursor-pointer flex align-center"
               href="pageeditor"
             >
@@ -38,7 +39,7 @@ export default async function RootLayout({
               <div className="align-center hidden group-hover:block p-2">
                 Page Editor
               </div>
-            </a>
+            </Link>
           </aside>
           <main className="h-full w-full bg-white text-black ml-14 overflow-auto">
             {children}

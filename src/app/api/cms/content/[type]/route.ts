@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { ContentType } from "@/models/ContentType";
 import { getContentModel } from "@/utils/getContentModel";
+import formidable from "formidable";
+import fs from "fs/promises";
+import path from "path";
 
 // GET all or single ?id=, supports pagination & search
 export async function GET(
@@ -63,21 +66,115 @@ export async function GET(
 }
 
 // POST create
+// Disable Next.js default body parser for this route
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+// Helper: decide folder based on schema type
+function getUploadDir(fieldType: string) {
+  switch (fieldType) {
+    case "image":
+      return path.join(process.cwd(), "public/images");
+    case "video":
+      return path.join(process.cwd(), "public/videos");
+    case "audio":
+      return path.join(process.cwd(), "public/audios");
+    case "document":
+      return path.join(process.cwd(), "public/documents");
+    default:
+      return path.join(process.cwd(), "public/files");
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { type: string } }
 ) {
   await dbConnect();
   const ct = await ContentType.findOne({ slug: params.type }).lean();
-  if (!ct)
+  if (!ct) {
     return NextResponse.json(
       { error: "Unknown content type" },
       { status: 404 }
     );
+  }
 
-  const body = await req.json();
+  const contentType = req.headers.get("content-type") || "";
+  let body: Record<string, any> = {};
+
+  if (contentType.includes("multipart/form-data")) {
+    // Prepare formidable uploadDir dynamically
+    const uploadBase = path.join(process.cwd(), "public/files");
+    await fs.mkdir(uploadBase, { recursive: true });
+
+    const form = formidable({
+      multiples: false,
+      keepExtensions: true,
+      uploadDir: uploadBase, // temporary dir, we’ll move after
+    });
+
+    const [fields, files] = await new Promise<[Record<string, any>, any]>(
+      (resolve, reject) => {
+        form.parse(req as any, (err, fields, files) => {
+          if (err) reject(err);
+          else resolve([fields, files]);
+        });
+      }
+    );
+
+    // merge text fields
+    body = { ...fields };
+
+    // Map field definitions from contentType
+    const fieldDefs = ct.fields || [];
+
+    for (const [fieldName, file] of Object.entries(files)) {
+      const f = Array.isArray(file) ? file[0] : file;
+      if (!f || !f.filepath) continue;
+
+      // find schema definition for this field
+      const def = fieldDefs.find((d: any) => d.name === fieldName);
+      const fieldType = def?.type || "file";
+
+      // decide upload dir
+      const targetDir = getUploadDir(fieldType);
+      await fs.mkdir(targetDir, { recursive: true });
+
+      // move file to correct location
+      const targetPath = path.join(
+        targetDir,
+        f.originalFilename || path.basename(f.filepath)
+      );
+      await fs.rename(f.filepath, targetPath);
+
+      // store relative path for DB
+      switch (fieldType) {
+        case "image":
+          body[fieldName] = "/images/" + path.basename(targetPath);
+          break;
+        case "video":
+          body[fieldName] = "/videos/" + path.basename(targetPath);
+          break;
+        case "audio":
+          body[fieldName] = "/audios/" + path.basename(targetPath);
+          break;
+        case "document":
+          body[fieldName] = "/documents/" + path.basename(targetPath);
+          break;
+        default:
+          body[fieldName] = "/files/" + path.basename(targetPath);
+      }
+    }
+  } else {
+    body = await req.json();
+  }
+
   const Model = getContentModel(ct);
-  const doc = await Model.create(body); // trust JSON fields align with ct.fields
+  const doc = await Model.create(body);
+
   return NextResponse.json(doc, { status: 201 });
 }
 

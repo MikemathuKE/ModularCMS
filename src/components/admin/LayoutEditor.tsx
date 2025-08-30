@@ -29,13 +29,14 @@ const componentCategories: ComponentCategory[] = [
       "CardFooter",
       "Grid",
       "Table",
-      "TableWrapper",
-      "TableHead",
-      "TableBody",
-      "TableHeader",
-      "TableRow",
-      "TableData",
-      "PaginationWrapper",
+      // "TableWrapper",
+      // "TableHead",
+      // "TableBody",
+      // "TableHeader",
+      // "TableRow",
+      // "TableData",
+      "ALink",
+      // "PaginationWrapper",
     ],
   },
   {
@@ -61,22 +62,22 @@ const componentCategories: ComponentCategory[] = [
     name: "Form Components",
     components: [
       "Form",
-      "TextInput",
-      "EmailInput",
-      "PasswordInput",
-      "NumberInput",
-      "CheckboxInput",
-      "RadioInput",
-      "FileInput",
-      "DateInput",
-      "RangeInput",
-      "SelectInput",
-      "TextArea",
-      "FieldWrapper",
-      "Label",
-      "FormGroup",
-      "ErrorText",
-      "Option",
+      // "TextInput",
+      // "EmailInput",
+      // "PasswordInput",
+      // "NumberInput",
+      // "CheckboxInput",
+      // "RadioInput",
+      // "FileInput",
+      // "DateInput",
+      // "RangeInput",
+      // "SelectInput",
+      // "TextArea",
+      // "FieldWrapper",
+      // "Label",
+      // "FormGroup",
+      // "ErrorText",
+      // "Option",
     ],
   },
 ];
@@ -113,7 +114,7 @@ export default function LayoutEditor({
 
   // fetch content types
   useEffect(() => {
-    fetch("/api/cms/contentTypes")
+    fetch("/api/cms/content-types")
       .then((res) => res.json())
       .then((data) => setContentTypes(data))
       .catch(() => setContentTypes([]));
@@ -439,7 +440,7 @@ export default function LayoutEditor({
                   onChange={(e) => updateProp("contentId", e.target.value)}
                 >
                   <option value="">None</option>
-                  {contentTypes.map((ct) => (
+                  {Object.values(contentTypes).map((ct) => (
                     <option key={ct.id} value={ct.id}>
                       {ct.name}
                     </option>

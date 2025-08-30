@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
                 {Object.values(stats.recentPages).map((p) => (
                   <li key={p.slug} className="flex justify-between">
                     <Link
-                      href={`/admin/pages/${p.slug}/edit`}
+                      href={`/admin/pages/edit/${p.slug}`}
                       className="text-blue-600 hover:underline"
                     >
                       {p.title || p.slug}

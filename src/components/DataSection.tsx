@@ -9,6 +9,10 @@ import React, {
 import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
+import {
+  replacePlaceholders,
+  resolveJSONPlaceholders,
+} from "@/renderer/renderUtils";
 
 export interface DataSectionProps extends CommonProps {
   contentType: string;
@@ -156,44 +160,4 @@ function resolveDynamicChildren(
 
   // Case 5: numbers / literals
   return children;
-}
-
-/**
- * Replace {{field}} placeholders
- */
-function replacePlaceholders(value: string, item: Record<string, any>): string {
-  return value.replace(
-    /\{\{(.*?)\}\}/g,
-    (_, field) => item[field.trim()] ?? ""
-  );
-}
-
-/**
- * Resolve placeholders in JSONNode
- */
-function resolveJSONPlaceholders(
-  node: JSONNode | string | number | null,
-  item: Record<string, any>
-): JSONNode | string | number | null {
-  if (!node) return null;
-
-  if (typeof node === "string") return replacePlaceholders(node, item);
-  if (typeof node === "number") return node;
-
-  const newProps: Record<string, any> = {};
-  for (const [key, value] of Object.entries(node.props || {})) {
-    if (typeof value === "string") {
-      newProps[key] = replacePlaceholders(value, item);
-    } else {
-      newProps[key] = value;
-    }
-  }
-
-  return {
-    ...node,
-    props: newProps,
-    children: node.children
-      ?.map((child) => resolveJSONPlaceholders(child, item))
-      .filter(Boolean),
-  };
 }

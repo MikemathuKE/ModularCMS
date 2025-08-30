@@ -1,10 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
+import { Button, Heading3 } from "./GeneralComponents";
 
 export interface CustomFormProps extends CommonProps {
+  contentType: string; // required
+  formTitle: string; // required
+  initialValues?: Record<string, any>; // preload values
+  onSuccess?: (data: any) => void; // callback after submission
+  onError?: (err: any) => void; // callback if submission fails
+
   // Core form attributes
   action?: string;
   method?: "get" | "post";
@@ -35,10 +42,219 @@ export interface CustomFormProps extends CommonProps {
   children?: React.ReactNode;
 }
 
+interface FieldDef {
+  name: string;
+  type: string; // "string" | "number" | "boolean" | "date" | "text" | "file" | "image"
+  required?: boolean;
+  label?: string;
+}
+
 export const Form = createStyledComponent<CustomFormProps>(
-  ({ children, ...props }: CustomFormProps) => (
-    <form {...props}>{children}</form>
-  ),
+  ({
+    contentType,
+    formTitle,
+    initialValues = {},
+    onSuccess,
+    onError,
+    children,
+    ...props
+  }: CustomFormProps) => {
+    const [fields, setFields] = useState<FieldDef[]>([]);
+    const [values, setValues] = useState<Record<string, any>>(initialValues);
+    const [files, setFiles] = useState<Record<string, File | null>>({});
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Load schema for contentType
+    useEffect(() => {
+      async function fetchSchema() {
+        try {
+          const res = await fetch(`/api/cms/content-types/${contentType}`);
+          const schema = await res.json();
+          setFields(schema.fields || []);
+          // initialize values
+          const defaults: Record<string, any> = {};
+          schema.fields.forEach((f: FieldDef) => {
+            if (f.type === "boolean")
+              defaults[f.name] = initialValues[f.name] ?? false;
+            else defaults[f.name] = initialValues[f.name] ?? "";
+          });
+          setValues(defaults);
+        } catch (err) {
+          console.error("Error fetching schema:", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      if (contentType) {
+        fetchSchema();
+      } else {
+        setLoading(false);
+      }
+    }, [contentType]);
+
+    function handleChange(
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
+    ) {
+      const {
+        name,
+        type,
+        value,
+        checked,
+        files: fileList,
+      } = e.target as HTMLInputElement;
+
+      if (type === "file" && fileList) {
+        setFiles((prev) => ({ ...prev, [name]: fileList[0] || null }));
+      } else {
+        setValues((prev) => ({
+          ...prev,
+          [name]: type === "checkbox" ? checked : value,
+        }));
+      }
+    }
+
+    async function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      if (contentType) {
+        setSubmitting(true);
+        try {
+          let res;
+
+          // If files are included → use multipart/form-data
+          if (Object.values(files).some((f) => f !== null)) {
+            const formData = new FormData();
+            Object.entries(values).forEach(([k, v]) => formData.append(k, v));
+            Object.entries(files).forEach(([k, f]) => {
+              if (f) formData.append(k, f);
+            });
+
+            res = await fetch(`/api/cms/content/${contentType}`, {
+              method: "POST",
+              body: formData,
+            });
+          } else {
+            res = await fetch(`/api/cms/content/${contentType}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(values),
+            });
+          }
+
+          if (!res.ok) throw new Error("Failed to submit form");
+          const data = await res.json();
+          if (onSuccess) onSuccess(data);
+        } catch (err) {
+          console.error(err);
+          if (onError) onError(err);
+        } finally {
+          setSubmitting(false);
+        }
+      }
+    }
+
+    if (loading) {
+      return <div>Loading {contentType} form...</div>;
+    }
+
+    return (
+      <form {...props} onSubmit={handleSubmit}>
+        {formTitle && <Heading3>{formTitle}</Heading3>}
+        {fields &&
+          fields.map((field) => (
+            <FieldWrapper
+              key={field.name}
+              label={field.label || field.name}
+              required={field.required}
+            >
+              {field.type === "string" && (
+                <TextInput
+                  name={field.name}
+                  value={values[field.name] || ""}
+                  onChange={handleChange}
+                  required={field.required}
+                />
+              )}
+
+              {field.type === "number" && (
+                <NumberInput
+                  name={field.name}
+                  value={values[field.name] || ""}
+                  onChange={handleChange}
+                  required={field.required}
+                />
+              )}
+
+              {field.type === "boolean" && (
+                <CheckboxInput
+                  name={field.name}
+                  checked={!!values[field.name]}
+                  onChange={handleChange}
+                />
+              )}
+
+              {field.type === "date" && (
+                <DateInput
+                  name={field.name}
+                  value={values[field.name] || ""}
+                  onChange={handleChange}
+                />
+              )}
+
+              {field.type === "text" && (
+                <TextArea
+                  name={field.name}
+                  value={values[field.name] || false}
+                  onChange={handleChange}
+                  required={field.required}
+                />
+              )}
+
+              {field.type === "email" && (
+                <EmailInput
+                  name={field.name}
+                  value={values[field.name] || false}
+                  onChange={handleChange}
+                  required={field.required}
+                />
+              )}
+
+              {field.type === "password" && (
+                <PasswordInput
+                  name={field.name}
+                  value={values[field.name] || false}
+                  onChange={handleChange}
+                  required={field.required}
+                />
+              )}
+
+              {field.type === "file" || field.type === "image" ? (
+                <FileInput
+                  name={field.name}
+                  onChange={handleChange}
+                  accept={field.type === "image" ? "image/*" : undefined}
+                  required={field.required}
+                />
+              ) : null}
+            </FieldWrapper>
+          ))}
+
+        {/* Extra manual children */}
+        {children}
+
+        <Button
+          type="submit"
+          disabled={submitting}
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          {submitting ? "Submitting..." : "Submit"}
+        </Button>
+      </form>
+    );
+  },
   "Form"
 );
 
@@ -198,13 +414,19 @@ export const ErrorText = createStyledComponent<ErrorTextProps>(
 export interface FieldWrapperProps extends CommonProps {
   label?: string;
   error?: string;
+  required?: boolean;
   children?: React.ReactNode;
 }
 
 export const FieldWrapper = createStyledComponent<FieldWrapperProps>(
-  ({ children, label, error, ...props }: FieldWrapperProps) => (
+  ({ children, label, required, error, ...props }: FieldWrapperProps) => (
     <div {...props}>
-      {label && <Label>{label}</Label>}
+      {label && (
+        <Label>
+          {label}
+          {required && <span className="text-red-500">*</span>}
+        </Label>
+      )}
       {children}
       {error && <ErrorText error={error} />}
     </div>
@@ -313,5 +535,5 @@ export interface TextAreaProps extends CommonProps {
 
 export const TextArea = createStyledComponent<TextAreaProps>(
   (props) => <textarea {...props} />,
-  "SelectInput"
+  "TextArea"
 );

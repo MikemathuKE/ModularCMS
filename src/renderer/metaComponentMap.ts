@@ -1,5 +1,6 @@
 import {
   PageContainer,
+  ALink,
   Topbar,
   Main,
   Sidebar,
@@ -29,7 +30,6 @@ import {
   TableRow,
   TableData,
   Table,
-  ALink,
 } from "@/components/LayoutComponents";
 
 import {
@@ -91,7 +91,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     },
   },
   // Layout Components
-  Link: {
+  ALink: {
     component: ALink,
     props: {
       href: "",
@@ -109,7 +109,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-
       visibility: "visible",
     },
   },
@@ -327,6 +326,8 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     component: Table,
     props: {
       id: null,
+      contentType: "",
+      displayColumns: "",
       style: null,
 
       data: [],
@@ -479,6 +480,8 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     component: Form,
     props: {
       id: null,
+      contentType: "",
+      formTitle: "",
       style: null,
       action: null,
       method: null,

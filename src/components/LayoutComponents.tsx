@@ -1,10 +1,11 @@
 "use client";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
 import { Button, Heading4, Span } from "./GeneralComponents";
 import Link from "next/link";
-import { TableColumn } from "@/lib/globals";
+import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
+import { resolveJSONPlaceholders } from "@/renderer/renderUtils";
 
 export interface CustomChildrenProps extends CommonProps {
   children?: React.ReactNode;
@@ -33,6 +34,7 @@ export const Sidebar = createStyledComponent<SidebarProps>(
 
 export interface ALinkProps extends CommonProps {
   href: string;
+  children: React.ReactNode;
 }
 
 export const ALink = createStyledComponent<ALinkProps>(
@@ -374,60 +376,255 @@ export const TableData = createStyledComponent<CustomChildrenProps>(
   "TableData"
 );
 
-export interface TableProps<T> extends CustomChildrenProps {
-  data: T[];
+export interface TableColumn {
+  key: string;
+  label: string;
+  render?: JSONNode;
+}
+
+export interface TableProps<T> {
+  data?: T[];
   columns: TableColumn[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+
+  contentType?: string;
+  filters?: Record<string, any>;
+  sort?: Record<string, 1 | -1>;
+  limit?: number;
+  displayColumns?: string; //comma separated list of columns
 }
 
 export const Table = createStyledComponent<TableProps<any>>(
-  ({ data, columns, currentPage, totalPages, onPageChange, ...props }) => {
+  ({
+    data: externalData,
+    columns,
+    currentPage,
+    totalPages,
+    onPageChange,
+    contentType,
+    filters = {},
+    sort = {},
+    limit = 10,
+    displayColumns,
+    ...props
+  }) => {
+    const [data, setData] = useState<any[]>(externalData || []);
+    const [loading, setLoading] = useState(false);
+    const [pages, setPages] = useState(totalPages || 1);
+
+    // Interactive state
+    const [pageSize, setPageSize] = useState(limit);
+    const [activeSort, setActiveSort] = useState<keyof any | null>(null);
+    const [activeSortDir, setActiveSortDir] = useState<1 | -1>(1);
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
+      {}
+    );
+    const [visibleCols, setVisibleCols] = useState<string[]>(
+      displayColumns ? displayColumns.split(",") : []
+    );
+    const [effectiveColumns, setEffectiveColumns] = useState<TableColumn[]>([]);
+    const [visibleColumns, SetVisibleColumns] = useState<TableColumn[]>([]);
+
+    // fetch when contentType given
+    useEffect(() => {
+      async function fetchData() {
+        setLoading(true);
+        try {
+          if (contentType) {
+            const query = {
+              filters: { ...filters, ...columnFilters },
+              sort: activeSort ? { [activeSort]: activeSortDir } : sort,
+              limit: pageSize,
+              page: currentPage,
+            };
+            const res = await fetch(
+              `/api/cms/content/${contentType}?q=${encodeURIComponent(
+                JSON.stringify(query)
+              )}`
+            );
+            const json = await res.json();
+            setData(json.items || []);
+            setPages(json.pages || 1);
+          }
+          setEffectiveColumns(
+            columns.length
+              ? columns
+              : data.length > 0
+              ? Object.keys(data[0]).map((key) => ({ key, label: key }))
+              : []
+          );
+
+          // visible columns logic
+          SetVisibleColumns(
+            visibleCols.length > 0
+              ? effectiveColumns.filter((c) => visibleCols.includes(c.key))
+              : effectiveColumns
+          );
+          // auto-generate columns if not provided
+        } catch (e) {
+          console.error("Table fetch error", e);
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchData();
+      if (!contentType) {
+        setEffectiveColumns(
+          data.length > 0
+            ? Object.keys(data[0]).map((key) => ({ key, label: key }))
+            : []
+        );
+
+        // visible columns logic
+        SetVisibleColumns(
+          visibleCols.length > 0
+            ? effectiveColumns.filter((c) => visibleCols.includes(c.key))
+            : effectiveColumns
+        );
+      }
+    }, [pageSize, currentPage]);
+
     return (
       <div {...props}>
-        <TableWrapper>
-          <TableHeader>
-            <TableRow>
-              {columns.map((col: TableColumn) => (
-                <TableHead key={col.key as string}>{col.label}</TableHead>
+        {/* Controls */}
+        <div className="flex items-center gap-4 mb-4">
+          {/* Page size selector */}
+          {/* <label className="flex items-center gap-2">
+            Show:
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                onPageChange(1); // reset to page 1
+              }}
+            >
+              {[5, 10, 20, 50].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((row, idx) => (
-              <TableRow key={idx}>
-                {columns.map((col) => (
-                  <TableData key={col.key as string}>{row[col.key]}</TableData>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </TableWrapper>
+            </select>
+          </label> */}
 
-        <PaginationWrapper>
-          <PageButton
-            disabled={currentPage === 1}
-            onClick={() => onPageChange(currentPage - 1)}
-          >
-            Previous
-          </PageButton>
-          <Span>
-            Page {currentPage} of {totalPages}
-          </Span>
-          <PageButton
-            disabled={currentPage === totalPages}
-            onClick={() => onPageChange(currentPage + 1)}
-          >
-            Next
-          </PageButton>
-        </PaginationWrapper>
+          {/* Sort dropdown */}
+          {/* <label className="flex items-center gap-2">
+            Sort by:
+            <select
+              value={activeSort || ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setActiveSort(val || null);
+              }}
+            >
+              <option value="">None</option>
+              {effectiveColumns.map((col) => (
+                <option key={col.key} value={col.key}>
+                  {col.label}
+                </option>
+              ))}
+            </select>
+            <button onClick={() => setActiveSortDir((d) => (d === 1 ? -1 : 1))}>
+              {activeSortDir === 1 ? "↑" : "↓"}
+            </button>
+          </label> */}
+
+          {/* Column toggles */}
+          {/* <div className="flex items-center gap-2">
+            Columns:
+            {effectiveColumns.map((col) => (
+              <label key={col.key} className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  checked={visibleColumns.some((c) => c.key === col.key)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setVisibleCols((prev) => [...prev, col.key]);
+                    } else {
+                      setVisibleCols((prev) =>
+                        prev.filter((k) => k !== col.key)
+                      );
+                    }
+                  }}
+                />
+                {col.label}
+              </label>
+            ))}
+          </div> */}
+        </div>
+        {loading ? (
+          <div>Loading {contentType}...</div>
+        ) : (
+          <>
+            <TableWrapper>
+              <TableHeader>
+                <TableRow>
+                  {visibleCols.length
+                    ? visibleCols.map((col, idx) => (
+                        <TableHead key={col}>
+                          {col}
+                          {/* Simple filter input */}
+                          {/* <div>
+                            <input
+                              type="text"
+                              value={columnFilters[col] || ""}
+                              onChange={(e) =>
+                                setColumnFilters((prev) => ({
+                                  ...prev,
+                                  [col]: e.target.value,
+                                }))
+                              }
+                              placeholder="Filter..."
+                              className="text-xs border p-1"
+                            />
+                          </div> */}
+                        </TableHead>
+                      ))
+                    : data.length
+                    ? Object.keys(data[0]).map((header, idx) => (
+                        <TableHead key={idx}>{header}</TableHead>
+                      ))
+                    : null}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.map((row, idx) => (
+                  <TableRow key={idx}>
+                    {visibleCols.length > 0
+                      ? visibleCols.map((col, key) => (
+                          <TableData key={key}>{row[col]}</TableData>
+                        ))
+                      : Object.values(row).map((data, key) => (
+                          <TableData key={key}>{data}</TableData>
+                        ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </TableWrapper>
+
+            {/* Pagination */}
+            <PaginationWrapper>
+              <PageButton
+                disabled={currentPage === 1}
+                onClick={() => onPageChange(currentPage - 1)}
+              >
+                Previous
+              </PageButton>
+              <Span>
+                Page {currentPage} of {pages}
+              </Span>
+              <PageButton
+                disabled={currentPage === pages}
+                onClick={() => onPageChange(currentPage + 1)}
+              >
+                Next
+              </PageButton>
+            </PaginationWrapper>
+          </>
+        )}
       </div>
     );
   },
-  "Table",
-  {
-    width: "100%",
-    overflowX: "auto",
-  }
+  "Table"
 );

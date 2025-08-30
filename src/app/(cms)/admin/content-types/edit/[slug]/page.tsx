@@ -92,6 +92,9 @@ export default function EditContentTypePage() {
               }
             >
               <option value="string">String</option>
+              <option value="text">Text</option>
+              <option value="email">Email</option>
+              <option value="password">Password</option>
               <option value="number">Number</option>
               <option value="boolean">Boolean</option>
               <option value="date">Date</option>
