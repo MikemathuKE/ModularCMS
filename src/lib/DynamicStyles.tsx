@@ -1,6 +1,6 @@
 "use client";
 import type { CSSProperties, ElementType } from "react";
-import { createContext, useContext } from "react";
+import React, { createContext, useContext, useState, useMemo } from "react";
 import { defaultTheme } from "@/theme/DefaultTheme";
 import { CommonProps } from "./globals";
 
@@ -15,18 +15,88 @@ type StyleInput<Props = unknown> =
 
 export type ComponentStyleMap = Record<string, Partial<CSSProperties>>;
 
-export interface AppTheme {
-  componentStyles: ComponentStyleMap;
+export interface ThemeVariables {
+  light: Record<string, string>;
+  dark: Record<string, string>;
 }
 
-export const ThemeContext = createContext<AppTheme | null>(defaultTheme);
+export interface AppTheme {
+  componentStyles: ComponentStyleMap;
+  variables: ThemeVariables;
+  themeMode?: "light" | "dark";
+}
 
-export const useTheme = () => useContext(ThemeContext);
+export interface ThemeContextValue {
+  theme: AppTheme;
+  themeMode: "light" | "dark";
+  layout: "default" | string;
+  setThemeMode: (mode: "light" | "dark") => void;
+}
+
+export const ThemeContext = createContext<ThemeContextValue>({
+  theme: { ...defaultTheme, themeMode: "light" },
+  themeMode: "light",
+  layout: "default",
+  setThemeMode: () => {},
+});
+
+export const ThemeProvider: React.FC<{
+  initialTheme?: AppTheme;
+  initialMode?: "light" | "dark";
+  children: React.ReactNode;
+}> = ({ initialTheme = defaultTheme, initialMode = "light", children }) => {
+  const [themeMode, setThemeMode] = useState<"light" | "dark">(initialMode);
+
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      theme: { ...initialTheme, themeMode },
+      themeMode,
+      setThemeMode,
+    }),
+    [initialTheme, themeMode]
+  );
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+};
+
+// Hooks
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used inside ThemeProvider");
+  return ctx.theme;
+};
+
+export const useThemeMode = () => {
+  const { themeMode, setThemeMode } = useContext(ThemeContext);
+  return { themeMode, setThemeMode };
+};
+
+// --- Utility: resolve {{varName}} placeholders ---
+function resolveVariables(
+  styles: CSSProperties,
+  variables: Record<string, string>
+): CSSProperties {
+  const resolved: CSSProperties = {};
+  for (const [key, value] of Object.entries(styles)) {
+    if (typeof value === "string") {
+      const replaced = value.replace(/\{\{(.+?)\}\}/g, (_, varName) => {
+        const trimmed = varName.trim();
+        return variables[trimmed] ?? "";
+      });
+      resolved[key as keyof CSSProperties] = replaced as any;
+    } else {
+      resolved[key as keyof CSSProperties] = value as any;
+    }
+  }
+  return resolved;
+}
 
 // Main function
 export function createStyledComponent<Props extends CommonProps>(
   Component: ElementType,
-  tagNameOverride: string, //override of tag name
+  tagNameOverride: string,
   extraStyles?: StyleInput<Props>
 ) {
   const tagName =
@@ -36,10 +106,13 @@ export function createStyledComponent<Props extends CommonProps>(
       : Component.displayName || Component.name || "Component");
 
   const Themed = (props: Props & { theme?: AppTheme }) => {
-    const contextTheme = useTheme();
-    const themedStyles = contextTheme?.componentStyles?.[tagName];
+    const theme = useTheme();
+    const themeMode = theme.themeMode ?? "light";
+    const variables = theme.variables?.[themeMode] ?? {};
 
-    // Determine computed extra styles
+    const themedStyles = theme?.componentStyles?.[tagName];
+
+    // Compute extra styles
     const computedExtraStyles =
       typeof extraStyles === "function"
         ? extraStyles(props)
@@ -51,14 +124,17 @@ export function createStyledComponent<Props extends CommonProps>(
       ...(props.style as CSSProperties),
     };
 
-    // Remove nulls and undefined
+    // Remove nulls/undefined
     const cleanStyles = Object.fromEntries(
       Object.entries(mergedStyles).filter(
         ([, value]) => value !== null && value !== undefined
       )
     ) as CSSProperties;
 
-    return <Component {...props} style={cleanStyles} />;
+    // 🔑 Resolve variables (including nested inside strings)
+    const finalStyles = resolveVariables(cleanStyles, variables);
+
+    return <Component {...props} style={finalStyles} />;
   };
 
   Themed.displayName = `Themed(${tagName})`;

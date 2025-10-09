@@ -7,6 +7,7 @@ const ThemeSchema = new Schema(
     slug: { type: String, required: true, unique: true, index: true },
     json: { type: Object, required: true },
     active: { type: Boolean, default: false }, // <--- add this
+    layout: { type: String, required: true, default: "default" },
   },
   { timestamps: true }
 );

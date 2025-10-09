@@ -4,8 +4,8 @@ import { CommonProps } from "@/lib/globals";
 import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
 import { Button, Heading4, Span } from "./GeneralComponents";
 import Link from "next/link";
-import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
-import { resolveJSONPlaceholders } from "@/renderer/renderUtils";
+import { JSONNode } from "@/renderer/JsonRenderer";
+import { useThemeMode } from "@/lib/DynamicStyles";
 
 export interface CustomChildrenProps extends CommonProps {
   children?: React.ReactNode;
@@ -382,7 +382,7 @@ export interface TableColumn {
   render?: JSONNode;
 }
 
-export interface TableProps<T> {
+export interface TableProps<T> extends CommonProps {
   data?: T[];
   columns: TableColumn[];
   currentPage: number;
@@ -627,4 +627,35 @@ export const Table = createStyledComponent<TableProps<any>>(
     );
   },
   "Table"
+);
+
+export interface ThemeModeSwitchProps extends CustomChildrenProps {
+  label?: string;
+}
+
+export const ThemeModeSwitch = createStyledComponent<ThemeModeSwitchProps>(
+  ({ label, ...props }: ThemeModeSwitchProps) => {
+    const { themeMode, setThemeMode } = useThemeMode();
+
+    useEffect(() => {
+      const savedTheme = localStorage.getItem("themeMode");
+      if (savedTheme && typeof savedTheme === "string")
+        setThemeMode(savedTheme);
+    }, []);
+
+    const toggleMode = () => {
+      localStorage.setItem(
+        "themeMode",
+        themeMode === "light" ? "dark" : "light"
+      );
+      setThemeMode(themeMode === "light" ? "dark" : "light");
+    };
+
+    return (
+      <button onClick={toggleMode} {...props}>
+        {label ?? (themeMode === "light" ? "🌙 Dark Mode" : "☀️ Light Mode")}
+      </button>
+    );
+  },
+  "ThemeModeSwitch"
 );

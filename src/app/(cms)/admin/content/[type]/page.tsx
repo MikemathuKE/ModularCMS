@@ -16,6 +16,7 @@ export default function ContentTypePage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [reloadContent, SetReloadContent] = useState(0);
 
   useEffect(() => {
     async function fetchItems() {
@@ -31,7 +32,7 @@ export default function ContentTypePage() {
       setLoading(false);
     }
     fetchItems();
-  }, [type, search, page]);
+  }, [type, search, page, reloadContent]);
 
   return (
     <div className="p-6">
@@ -83,12 +84,15 @@ export default function ContentTypePage() {
                       )
                         return null;
                       return (
-                        <span
-                          key={key}
-                          className="inline-block px-2 py-1 mr-1 text-xs rounded bg-gray-200"
-                        >
-                          {key}: {String(val)}
-                        </span>
+                        <>
+                          <span
+                            key={key}
+                            className="inline-block px-2 py-1 mr-1 text-xs rounded bg-gray-200"
+                          >
+                            {key}: {String(val)}
+                          </span>
+                          <br />
+                        </>
                       );
                     })}
                   </td>
@@ -99,23 +103,54 @@ export default function ContentTypePage() {
                     >
                       Edit
                     </Link>
+                    {!item.published && (
+                      <button
+                        onClick={async () => {
+                          if (
+                            !confirm(
+                              "Are you sure that you wish to Publish this content?"
+                            )
+                          )
+                            return;
+                          await fetch(`/api/cms/content/${type}/${item._id}`, {
+                            method: "PUT",
+                            body: JSON.stringify({ published: true }),
+                          });
+                          SetReloadContent((prev) => prev + 1);
+                        }}
+                        className="px-3 py-1 m-1 rounded-md bg-gray-600 text-white hover:bg-gray-700"
+                      >
+                        Publish
+                      </button>
+                    )}
+                    {item.published && (
+                      <button
+                        onClick={async () => {
+                          if (
+                            !confirm(
+                              "Are you sure that you wish to Draft this content?"
+                            )
+                          )
+                            return;
+                          await fetch(`/api/cms/content/${type}/${item._id}`, {
+                            method: "PUT",
+                            body: JSON.stringify({ published: false }),
+                          });
+                          SetReloadContent((prev) => prev + 1);
+                        }}
+                        className="px-3 py-1 m-1 rounded-md bg-gray-600 text-white hover:bg-gray-700"
+                      >
+                        To Draft
+                      </button>
+                    )}
                     <button
                       onClick={async () => {
-                        if (!confirm("Are you sure?")) return;
-                        await fetch(`/api/cms/content/${type}/${item._id}`, {
-                          method: "DELETE",
-                        });
-                        setItems((prev) =>
-                          prev.filter((p) => p._id !== item._id)
-                        );
-                      }}
-                      className="px-3 py-1 m-1 rounded-md bg-gray-600 text-white hover:bg-gray-700"
-                    >
-                      Publish
-                    </button>
-                    <button
-                      onClick={async () => {
-                        if (!confirm("Are you sure?")) return;
+                        if (
+                          !confirm(
+                            "Are you sure that you wish to Delete this content?"
+                          )
+                        )
+                          return;
                         await fetch(`/api/cms/content/${type}/${item._id}`, {
                           method: "DELETE",
                         });

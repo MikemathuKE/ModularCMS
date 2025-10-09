@@ -1,60 +1,78 @@
 "use client";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
-import { ThemeContext, AppTheme } from "@/lib/DynamicStyles";
+import { useEffect, useState, useMemo } from "react";
+import { AppTheme } from "@/lib/DynamicStyles";
 import { defaultTheme } from "@/theme/DefaultTheme";
+import { ThemeContext, ThemeContextValue } from "@/lib/DynamicStyles";
 
-interface ThemeContext {
+interface ThemeProviderProps {
   children: ReactNode;
   themeIdentifier?: null | string;
+  themeMode?: "light" | "dark";
 }
 
-export const ThemeProvider = ({ children, themeIdentifier }: ThemeContext) => {
-  async function getTheme(): Promise<AppTheme | null> {
-    const response = await fetch(
-      `/api/cms/themes/active?id=${themeIdentifier}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          Authorization: "Bearer ",
-        },
+export const ThemeProvider = ({
+  children,
+  themeIdentifier,
+  themeMode = "light",
+}: ThemeProviderProps) => {
+  // ensure defaultTheme always has a themeMode
+  const initialTheme: AppTheme = { ...defaultTheme, themeMode };
+
+  const [theme, setTheme] = useState<AppTheme>(initialTheme);
+  const [mode, setMode] = useState<"light" | "dark">(themeMode);
+
+  async function getTheme(): Promise<void> {
+    try {
+      const response = await fetch(
+        `/api/cms/themes/active?id=${themeIdentifier}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8",
+            Authorization: "Bearer ", // add token later if needed
+          },
+        }
+      );
+
+      if (!response.ok) {
+        setTheme({ ...defaultTheme, themeMode: mode });
+        return;
       }
-    );
 
-    if (!response.ok) {
-      SetTheme(defaultTheme);
-      return null;
+      const result = await response.json();
+      if (result && Object.keys(result).length !== 0) {
+        const loaded = result["json"] as AppTheme;
+        setTheme({ ...loaded, themeMode: mode });
+      } else {
+        setTheme({ ...defaultTheme, themeMode: mode });
+      }
+    } catch (err) {
+      console.error("Failed to load theme:", err);
+      setTheme({ ...defaultTheme, themeMode: mode });
     }
-
-    const result = await response.json();
-    if (Object.keys(result).length !== 0) {
-      SetTheme(result["json"] as AppTheme);
-      return result["json"] as AppTheme;
-    } else {
-      SetTheme(defaultTheme);
-    }
-    return null;
   }
 
-  const [theme, SetTheme] = useState<AppTheme>(
-    typeof themeIdentifier === "object" &&
-      themeIdentifier !== null &&
-      themeIdentifier !== undefined
-      ? (themeIdentifier as AppTheme)
-      : ({} as AppTheme)
+  useEffect(() => {
+    if (!themeIdentifier || typeof themeIdentifier !== "object") {
+      getTheme();
+    } else if (typeof themeIdentifier === "object") {
+      setTheme({ ...(themeIdentifier as AppTheme), themeMode: mode });
+    }
+  }, [themeIdentifier, mode]);
+
+  const contextValue: ThemeContextValue = useMemo(
+    () => ({
+      theme,
+      themeMode: mode,
+      setThemeMode: setMode,
+    }),
+    [theme, mode]
   );
 
-  // Effect Theme On Page Load
-  useEffect(() => {
-    if (
-      !themeIdentifier ||
-      (themeIdentifier && typeof themeIdentifier !== "object")
-    )
-      getTheme();
-  }, []);
-
   return (
-    <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={contextValue}>
+      {children}
+    </ThemeContext.Provider>
   );
 };

@@ -5,29 +5,18 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
 
-interface PageData {
-  json: JSONNode;
-  slug: string;
-  published: boolean;
-}
-
 export default function PublicPage() {
   const { slug } = useParams();
-  const [pageData, setPageData] = useState<PageData | null>(null);
+  const [pageData, setPageData] = useState<JSONNode | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPage() {
       try {
-        const res = await fetch(`/api/cms/pages/${slug}`);
+        const res = await fetch(`/api/cms/pages/${slug}/render`);
         if (!res.ok) throw new Error("Failed to fetch page data");
-        const data: PageData = await res.json();
-
-        if (!data.published) {
-          setPageData(null);
-        } else {
-          setPageData(data);
-        }
+        const data = await res.json();
+        setPageData(data);
       } catch (err) {
         console.error(err);
         setPageData(null);
@@ -57,7 +46,7 @@ export default function PublicPage() {
   return (
     <main className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
-        {renderJSONNode(pageData.json)}
+        {renderJSONNode(pageData)}
       </div>
     </main>
   );

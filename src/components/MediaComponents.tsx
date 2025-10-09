@@ -13,7 +13,7 @@ export interface AudioProps
 
 export const AudioMedia = createStyledComponent<AudioProps>(
   ({ src, controls = true, ...rest }: AudioProps) => (
-    <audio src={src} controls={controls} {...rest} />
+    <audio src={src === "" ? undefined : src} controls={controls} {...rest} />
   ),
   "Audio"
 );
@@ -29,7 +29,7 @@ export interface VideoProps
 export const VideoMedia = createStyledComponent<VideoProps>(
   ({ src, controls = true, width, height, ...rest }: VideoProps) => (
     <video
-      src={src}
+      src={src === "" ? undefined : src}
       controls={controls}
       width={width}
       height={height}
@@ -59,15 +59,19 @@ export const ImageMedia = createStyledComponent<ImageProps>(
     objectFit = "cover",
     priority = false,
   }: ImageProps) => (
-    <NextImage
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      layout={layout}
-      objectFit={objectFit}
-      priority={priority}
-    />
+    <>
+      {src !== "" && (
+        <NextImage
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          layout={layout}
+          objectFit={objectFit}
+          priority={priority}
+        />
+      )}
+    </>
   ),
   "Image"
 );

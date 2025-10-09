@@ -87,3 +87,89 @@ export const Text = createStyledComponent<StringProps>(
   ({ text }) => <>{text}</>,
   "Text"
 );
+
+import { $generateHtmlFromNodes } from "@lexical/html";
+import { createEditor } from "lexical";
+
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { LinkNode, AutoLinkNode } from "@lexical/link";
+import { CodeNode } from "@lexical/code";
+
+export function lexicalJsonToHtml(json: string): string {
+  try {
+    if (!json || json.trim() === "") return "";
+
+    const parsed = JSON.parse(json);
+    // Ensure structure is valid
+    if (!parsed.root || !parsed.root.children) {
+      return "";
+    }
+
+    const editor = createEditor({
+      nodes: [
+        HeadingNode,
+        QuoteNode,
+        ListNode,
+        ListItemNode,
+        LinkNode,
+        AutoLinkNode,
+        CodeNode,
+      ],
+    });
+    const editorState = editor.parseEditorState(parsed);
+
+    // If state is empty, skip rendering
+    if (editorState.isEmpty()) {
+      return "";
+    }
+
+    let html = "";
+    editor.setEditorState(editorState);
+    editor.update(() => {
+      html = $generateHtmlFromNodes(editor);
+    });
+
+    return html;
+  } catch (err) {
+    console.error("Error converting Lexical JSON to HTML:", err);
+    return "";
+  }
+}
+
+// utils/getNestedValue.ts
+export function getNestedValue(obj: any, path: string): any {
+  return path
+    .split(".")
+    .reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+}
+
+function renderWithVariables(
+  html: string,
+  context: Record<string, any> | undefined
+) {
+  if (!context) return html;
+  return html.replace(/\{\{([a-zA-Z0-9_.]+)\}\}/g, (_, path) => {
+    const value = getNestedValue(context, path.trim());
+    return value !== undefined ? String(value) : `{{${path}}}`;
+  });
+}
+
+interface RichTextProps extends StringProps {
+  richText: string;
+  variables?: Record<string, any>;
+}
+
+export const RichText = createStyledComponent<RichTextProps>(
+  ({ richText, variables }: RichTextProps) => {
+    if (!richText) return null;
+
+    // Detect JSON vs plain text
+    const isJson = richText.trim().startsWith("{");
+    const html = isJson ? lexicalJsonToHtml(richText) : richText;
+    if (!html) return null;
+
+    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  },
+  "RichText"
+);

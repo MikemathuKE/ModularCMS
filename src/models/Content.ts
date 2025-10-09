@@ -1,5 +1,4 @@
 import mongoose, { Schema } from "mongoose";
-import { ContentType } from "./ContentType"; // your existing content type model
 
 export async function getContentModel(typeName: string, fields: any[]) {
   const schemaFields: any = {};

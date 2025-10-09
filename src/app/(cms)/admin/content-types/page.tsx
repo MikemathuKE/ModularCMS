@@ -57,7 +57,7 @@ export default function ContentTypesPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Content Types</h1>
         <Link
-          href="/admin/content-types/add"
+          href="/admin/content-types/new"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Add Content Type

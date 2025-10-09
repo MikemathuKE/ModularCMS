@@ -1,10 +1,82 @@
 import type { AppTheme } from "@/lib/DynamicStyles";
 
 export const defaultTheme: AppTheme = {
+  variables: {
+    light: {
+      primaryColor: "#2563eb",
+      secondaryColor: "#1e293b",
+      tertiaryColor: "#f9fafb",
+      topBarText: "#f9fafb",
+      SidebarText: "#f9fafb",
+      buttonColor: "#2563eb",
+      buttonHoverColor: "#1d4ed8",
+      backgroundImage: "none",
+      backgroundColor: "#ffffff",
+      textColor: "#111827",
+      sectionColor: "#f9fafb",
+      sectionTransparency: "1",
+      borderColor: "#d1d5db",
+      mutedTextColor: "#6b7280",
+      headingColor: "#111827",
+      linkColor: "#2563eb",
+      errorColor: "#dc2626",
+      successColor: "#16a34a",
+      warningColor: "#f59e0b",
+      infoColor: "#0ea5e9",
+      badgeBgColor: "#e0f2fe",
+      badgeTextColor: "#0369a1",
+      tableHeadBg: "#f1f1f1",
+      tableHeadText: "#333333",
+      tableBodyText: "#444444",
+      pageButtonBg: "#f5f5f5",
+      pageButtonBorder: "#cccccc",
+      blockquoteBorder: "#d1d5db",
+      blockquoteText: "#6b7280",
+      cardShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      modalShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+      menuShadow: "0 4px 6px rgba(0,0,0,0.1)",
+      navbarShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    },
+    dark: {
+      primaryColor: "#3b82f6",
+      secondaryColor: "#0f172a",
+      tertiaryColor: "#1e293b",
+      topBarText: "#f9fafb",
+      SidebarText: "#f9fafb",
+      buttonColor: "#3b82f6",
+      buttonHoverColor: "#2563eb",
+      backgroundImage: "none",
+      backgroundColor: "#0f172a",
+      textColor: "#f9fafb",
+      sectionColor: "#1e293b",
+      sectionTransparency: "0.85",
+      borderColor: "#334155",
+      mutedTextColor: "#94a3b8",
+      headingColor: "#f1f5f9",
+      linkColor: "#3b82f6",
+      errorColor: "#f87171",
+      successColor: "#4ade80",
+      warningColor: "#fbbf24",
+      infoColor: "#38bdf8",
+      badgeBgColor: "#1e40af",
+      badgeTextColor: "#dbeafe",
+      tableHeadBg: "#1e293b",
+      tableHeadText: "#e2e8f0",
+      tableBodyText: "#cbd5e1",
+      pageButtonBg: "#334155",
+      pageButtonBorder: "#475569",
+      blockquoteBorder: "#475569",
+      blockquoteText: "#94a3b8",
+      cardShadow: "0 1px 3px rgba(0, 0, 0, 0.6)",
+      modalShadow: "0 10px 25px rgba(0, 0, 0, 0.7)",
+      menuShadow: "0 4px 6px rgba(0,0,0,0.6)",
+      navbarShadow: "0 2px 4px rgba(0,0,0,0.6)",
+    },
+  },
   componentStyles: {
     Button: {
-      backgroundColor: "#2563eb",
-      color: "#ffffff",
+      backgroundColor: "{{buttonColor}}",
+      color: "{{backgroundColor}}",
       border: "none",
       borderRadius: "0.375rem",
       padding: "0.5rem 1rem",
@@ -12,13 +84,11 @@ export const defaultTheme: AppTheme = {
       cursor: "pointer",
       transition: "background-color 0.3s ease",
     },
-
-    // Form Items
     TextInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db", // Tailwind gray-300
-      borderRadius: "0.375rem", // rounded-md
+      border: "1px solid {{borderColor}}",
+      borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
       outline: "none",
@@ -31,7 +101,7 @@ export const defaultTheme: AppTheme = {
     EmailInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
@@ -45,7 +115,7 @@ export const defaultTheme: AppTheme = {
     PasswordInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
@@ -59,12 +129,12 @@ export const defaultTheme: AppTheme = {
     NumberInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
       outline: "none",
-      MozAppearance: "textfield", // hide spinner in Firefox
+      MozAppearance: "textfield",
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
@@ -73,7 +143,7 @@ export const defaultTheme: AppTheme = {
     CheckboxInput: {
       width: "1rem",
       height: "1rem",
-      accentColor: "#2563eb", // blue-600
+      accentColor: "{{primaryColor}}",
       cursor: "pointer",
       justifyContent: "center",
       alignContent: "center",
@@ -83,7 +153,7 @@ export const defaultTheme: AppTheme = {
     RadioInput: {
       width: "1rem",
       height: "1rem",
-      accentColor: "#2563eb",
+      accentColor: "{{primaryColor}}",
       cursor: "pointer",
       justifyContent: "center",
       alignContent: "center",
@@ -92,9 +162,9 @@ export const defaultTheme: AppTheme = {
     },
     FileInput: {
       padding: "0.25rem 0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
-      backgroundColor: "#f9fafb",
+      backgroundColor: "{{tertiaryColor}}",
       fontSize: "0.875rem",
       cursor: "pointer",
       justifyContent: "center",
@@ -105,7 +175,7 @@ export const defaultTheme: AppTheme = {
     DateInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
@@ -119,8 +189,8 @@ export const defaultTheme: AppTheme = {
       width: "100%",
       padding: "0.5rem",
       minHeight: "5rem",
-      border: "1px solid #d1d5db", // gray-300
-      borderRadius: "0.375rem", // rounded-md
+      border: "1px solid {{borderColor}}",
+      borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
       outline: "none",
@@ -134,13 +204,13 @@ export const defaultTheme: AppTheme = {
     SelectInput: {
       width: "100%",
       padding: "0.5rem",
-      border: "1px solid #d1d5db",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.375rem",
       fontSize: "1rem",
       lineHeight: "1.5",
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       outline: "none",
-      appearance: "none", // removes default arrow
+      appearance: "none",
       backgroundImage:
         "url('data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>')",
       backgroundRepeat: "no-repeat",
@@ -158,7 +228,7 @@ export const defaultTheme: AppTheme = {
       appearance: "none",
       height: "0.5rem",
       borderRadius: "0.25rem",
-      backgroundColor: "#e5e7eb", // gray-200
+      backgroundColor: "#e5e7eb",
       outline: "none",
       transition: "background 0.2s ease",
       justifyContent: "center",
@@ -188,7 +258,7 @@ export const defaultTheme: AppTheme = {
     ErrorText: {
       marginTop: "0.25rem",
       fontSize: "0.875rem",
-      color: "#dc2626", // Red-600
+      color: "{{errorColor}}",
     },
     FieldWrapper: {
       display: "flex",
@@ -196,8 +266,6 @@ export const defaultTheme: AppTheme = {
       gap: "0.25rem",
       width: "100%",
     },
-
-    // Media
     AudioMedia: {
       width: "100%",
       maxWidth: "100%",
@@ -229,13 +297,11 @@ export const defaultTheme: AppTheme = {
       justifyContent: "center",
       textAlign: "center",
     },
-
-    // General Items
     Card: {
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       borderRadius: "0.5rem",
       padding: "1rem",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      boxShadow: "{{cardShadow}}",
       alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
@@ -244,10 +310,10 @@ export const defaultTheme: AppTheme = {
     },
     CardHeader: {
       padding: "1rem",
-      borderBottom: "1px solid #e5e7eb",
+      borderBottom: "1px solid {{borderColor}}",
       fontWeight: "600",
       fontSize: "1.125rem",
-      backgroundColor: "#f9fafb",
+      backgroundColor: "{{tertiaryColor}}",
       alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
@@ -255,10 +321,10 @@ export const defaultTheme: AppTheme = {
     },
     CardFooter: {
       padding: "1rem",
-      borderTop: "1px solid #e5e7eb",
+      borderTop: "1px solid {{borderColor}}",
       display: "flex",
       justifyContent: "flex-end",
-      backgroundColor: "#f9fafb",
+      backgroundColor: "{{tertiaryColor}}",
       alignItems: "center",
       textAlign: "center",
       width: "100%",
@@ -269,7 +335,7 @@ export const defaultTheme: AppTheme = {
       display: "flex",
       flexDirection: "column",
       gap: "0.5rem",
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
@@ -278,22 +344,22 @@ export const defaultTheme: AppTheme = {
       flex: 1,
     },
     Modal: {
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       padding: "2rem",
       borderRadius: "0.5rem",
       width: "90%",
       maxWidth: "500px",
-      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+      boxShadow: "{{modalShadow}}",
     },
     Text: {
       fontSize: "1rem",
-      color: "#111827",
+      color: "{{textColor}}",
     },
     Label: {
       fontSize: "0.875rem",
       fontWeight: "500",
       marginBottom: "0.25rem",
-      color: "#374151",
+      color: "{{mutedTextColor}}",
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
@@ -302,7 +368,7 @@ export const defaultTheme: AppTheme = {
     Checkbox: {
       width: "1rem",
       height: "1rem",
-      accentColor: "#2563eb",
+      accentColor: "{{primaryColor}}",
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
@@ -311,7 +377,7 @@ export const defaultTheme: AppTheme = {
     Radio: {
       width: "1rem",
       height: "1rem",
-      accentColor: "#2563eb",
+      accentColor: "{{primaryColor}}",
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
@@ -320,8 +386,8 @@ export const defaultTheme: AppTheme = {
     Select: {
       padding: "0.5rem",
       borderRadius: "0.375rem",
-      border: "1px solid #d1d5db",
-      backgroundColor: "#ffffff",
+      border: "1px solid {{borderColor}}",
+      backgroundColor: "{{backgroundColor}}",
       fontSize: "1rem",
       justifyContent: "center",
       alignContent: "center",
@@ -337,7 +403,7 @@ export const defaultTheme: AppTheme = {
       textAlign: "center",
     },
     TableRow: {
-      borderBottom: "1px solid #e5e7eb",
+      borderBottom: "1px solid {{borderColor}}",
       justifyContent: "center",
       alignContent: "center",
       alignItems: "center",
@@ -364,73 +430,68 @@ export const defaultTheme: AppTheme = {
     },
     PageButton: {
       padding: "0.2rem 0.5rem",
-      backgroundColor: "#f5f5f5",
-      border: "1px solid #ccc",
+      backgroundColor: "{{pageButtonBg}}",
+      border: "1px solid {{pageButtonBorder}}",
       cursor: "pointer",
       borderRadius: "4px",
       transition: "background 0.3s ease",
     },
     TableHead: {
-      backgroundColor: "#f1f1f1",
-      color: "#333",
+      backgroundColor: "{{tableHeadBg}}",
+      color: "{{tableHeadText}}",
       fontWeight: "bold",
       fontSize: "1rem",
       textAlign: "center",
-      borderBottom: "2px solid #ccc",
+      borderBottom: "2px solid {{pageButtonBorder}}",
     },
     TableBody: {
       fontSize: "0.95rem",
-      color: "#444",
+      color: "{{tableBodyText}}",
     },
     Heading: {
       fontSize: "1.25rem",
       fontWeight: "600",
       marginBottom: "0.5rem",
-      color: "#111827",
+      color: "{{headingColor}}",
     },
     Heading1: {
       fontSize: "2.25rem",
       fontWeight: 700,
       margin: "1.5rem 0 1rem 0",
-      color: "#111827",
+      color: "{{headingColor}}",
     },
-
     Heading2: {
       fontSize: "1.875rem",
       fontWeight: 600,
       margin: "1.25rem 0 1rem 0",
-      color: "#111827",
+      color: "{{headingColor}}",
     },
-
     Heading3: {
       fontSize: "1.5rem",
       fontWeight: 600,
       margin: "1rem 0",
-      color: "#1f2937",
+      color: "{{headingColor}}",
     },
-
     Heading4: {
       fontSize: "1.25rem",
-      fontWeight: 600,
+      fontWeight: "600",
       margin: "0.75rem 0",
-      color: "#1f2937",
+      color: "{{headingColor}}",
     },
-
     Heading5: {
       fontSize: "1rem",
-      fontWeight: 600,
+      fontWeight: "600",
       margin: "0.5rem 0",
-      color: "#374151",
+      color: "{{mutedTextColor}}",
     },
-
     Heading6: {
       fontSize: "0.875rem",
-      fontWeight: 500,
+      fontWeight: "500",
       margin: "0.5rem 0",
-      color: "#6b7280",
+      color: "{{mutedTextColor}}",
     },
     Link: {
-      color: "#2563eb",
+      color: "{{linkColor}}",
       textDecoration: "none",
       cursor: "pointer",
       display: "flex",
@@ -450,8 +511,8 @@ export const defaultTheme: AppTheme = {
       objectFit: "cover",
     },
     Badge: {
-      backgroundColor: "#e0f2fe",
-      color: "#0369a1",
+      backgroundColor: "{{badgeBgColor}}",
+      color: "{{badgeTextColor}}",
       fontSize: "0.75rem",
       padding: "0.25rem 0.5rem",
       borderRadius: "9999px",
@@ -460,26 +521,24 @@ export const defaultTheme: AppTheme = {
       fontSize: "1rem",
       lineHeight: "1.6",
       margin: "0 0 1rem 0",
-      color: "#374151",
+      color: "{{mutedTextColor}}",
     },
     Form: {
       display: "flex",
       flexDirection: "column",
       gap: "1rem",
       padding: "1.5rem",
-      border: "1px solid #e5e7eb",
+      border: "1px solid {{borderColor}}",
       borderRadius: "0.5rem",
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       maxWidth: "600px",
       width: "100%",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      boxShadow: "{{cardShadow}}",
       alignContent: "center",
       alignItems: "center",
       textAlign: "center",
       justifyContent: "center",
     },
-
-    // 📋 Lists
     ul: {
       paddingLeft: "1.5rem",
       marginBottom: "1.25rem",
@@ -493,51 +552,45 @@ export const defaultTheme: AppTheme = {
     li: {
       marginBottom: "0.5rem",
       fontSize: "1rem",
-      color: "#374151",
+      color: "{{mutedTextColor}}",
     },
-
-    // 💬 Quotes
     blockquote: {
-      borderLeft: "4px solid #d1d5db",
+      borderLeft: "4px solid {{blockquoteBorder}}",
       paddingLeft: "1.25rem",
-      color: "#6b7280",
+      color: "{{blockquoteText}}",
       fontStyle: "italic",
       margin: "1.5rem 0",
     },
-
     Section: {
       padding: "2rem 1.5rem",
       margin: "2rem 0",
-      backgroundColor: "#f9fafb", // subtle background
+      backgroundColor: "{{sectionColor}}",
       borderRadius: "0.5rem",
-      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
-      border: "1px solid #e5e7eb",
+      boxShadow: "0 1px 3px rgba(0, 0, 0, {{sectionTransparency}})",
+      border: "1px solid {{borderColor}}",
       display: "block",
       alignItems: "center",
       justifyContent: "center",
       alignContent: "center",
       textAlign: "center",
     },
-
-    // === Layout Components ===
     PageContainer: {
       display: "flex",
       flexDirection: "column",
       minHeight: "100vh",
       width: "100%",
-      backgroundColor: "#f9fafb", // light background
-      color: "#000000",
+      backgroundColor: "{{sectionColor}}",
+      color: "{{textColor}}",
       overflow: "hidden",
     },
-
     Topbar: {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      backgroundColor: "#0f172a", // Gray-800
-      color: "#f1f5f9",
+      backgroundColor: "{{secondaryColor}}",
+      color: "{{topBarText}}",
       height: "3.5rem",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      boxShadow: "{{navbarShadow}}",
       position: "fixed",
       top: "0",
       width: "100%",
@@ -546,41 +599,37 @@ export const defaultTheme: AppTheme = {
       textAlign: "center",
       overflow: "hidden",
     },
-
     Sidebar: {
       display: "flex",
       flexDirection: "column",
-      width: "16rem", // 256px
-      backgroundColor: "#1e293b", // Gray-50
+      width: "16rem",
+      backgroundColor: "{{secondaryColor}}",
       height: "100%",
       padding: "1rem",
-      borderRight: "1px solid #334155", // Gray-200
+      borderRight: "1px solid {{borderColor}}",
       position: "fixed",
-      color: "#e2e8f0",
+      color: "{{SidebarText}}",
       marginTop: "3.5rem",
       visibility: "visible",
       transition: "transform 0.3s ease-in-out",
     },
-
     Main: {
-      backgroundColor: "#ffffff",
+      backgroundColor: "{{backgroundColor}}",
       overflowX: "hidden",
       display: "flex",
       color: "inherit",
       flex: 1,
       overflowY: "auto",
     },
-
     Info: {
       padding: "2rem",
-      backgroundColor: "#fefefe",
+      backgroundColor: "{{backgroundColor}}",
       width: "100%",
       overflowX: "hidden",
       overflowY: "hidden",
       color: "inherit",
       flex: 1,
     },
-
     Footer: {
       display: "flex",
       flexDirection: "row",
@@ -588,9 +637,9 @@ export const defaultTheme: AppTheme = {
       alignItems: "center",
       justifyContent: "center",
       padding: "2rem 1rem",
-      backgroundColor: "#0f172a",
-      borderTop: "1px solid #1e293b",
-      color: "#94a3b8",
+      backgroundColor: "{{secondaryColor}}",
+      borderTop: "1px solid {{borderColor}}",
+      color: "{{mutedTextColor}}",
       fontSize: "0.875rem",
       lineHeight: "1.5",
       textAlign: "center",
@@ -608,8 +657,6 @@ export const defaultTheme: AppTheme = {
       alignItems: "stretch",
       width: "100%",
     },
-
-    // === Navigation Components ===
     Menu: {
       display: "flex",
       flexDirection: "column",
@@ -621,7 +668,6 @@ export const defaultTheme: AppTheme = {
       cursor: "pointer",
       position: "relative",
     },
-
     MenuList: {
       listStyle: "none",
       margin: "0",
@@ -629,8 +675,8 @@ export const defaultTheme: AppTheme = {
       position: "absolute",
       top: "100%",
       right: 0,
-      backgroundColor: "#ffffff",
-      boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+      backgroundColor: "{{backgroundColor}}",
+      boxShadow: "{{menuShadow}}",
       borderRadius: "0.375rem",
       marginTop: "0.5rem",
       padding: "0",
@@ -638,16 +684,14 @@ export const defaultTheme: AppTheme = {
       zIndex: 1001,
       visibility: "visible",
     },
-
     MenuItem: {
       padding: "0.5rem 1rem",
       fontSize: "0.875rem",
-      color: "#374151", // Gray-700
+      color: "{{mutedTextColor}}",
       cursor: "pointer",
       transition: "background-color 0.2s ease-in-out",
       whiteSpace: "nowrap",
     },
-
     SideNavigation: {
       display: "flex",
       flexDirection: "column",
@@ -655,15 +699,14 @@ export const defaultTheme: AppTheme = {
       padding: "1rem 0",
       color: "inherit",
     },
-
     NavigationDrawer: {
       position: "fixed",
       top: "0",
       left: "0",
       height: "100%",
       width: "16rem",
-      backgroundColor: "#ffffff",
-      borderRight: "1px solid #e5e7eb",
+      backgroundColor: "{{backgroundColor}}",
+      borderRight: "1px solid {{borderColor}}",
       boxShadow: "2px 0 6px rgba(0,0,0,0.1)",
       zIndex: 1050,
       padding: "1rem",
@@ -676,9 +719,9 @@ export const defaultTheme: AppTheme = {
       justifyContent: "space-between",
       backgroundColor: "transparent",
       padding: "0.75rem",
-      color: "#ffffff",
+      color: "{{topBarText}}",
       height: "3.5rem",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      boxShadow: "{{navbarShadow}}",
       position: "fixed",
       top: 0,
       right: 0,
@@ -694,9 +737,9 @@ export const defaultTheme: AppTheme = {
       justifyContent: "flex-end",
       backgroundColor: "transparent",
       padding: "0.75rem",
-      color: "#ffffff",
+      color: "{{topBarText}}",
       height: "3.5rem",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      boxShadow: "{{navbarShadow}}",
       position: "relative",
       top: 0,
       right: 0,
@@ -708,10 +751,19 @@ export const defaultTheme: AppTheme = {
     },
     NavItem: {
       padding: "0.5rem",
+      color: "inherit",
     },
     Logo: {
       backgroundColor: "transparent",
       width: "auto",
+    },
+    ThemeModeSwitch: {
+      backgroundColor: "transparent",
+      color: "{{topbarColor}}",
+      borderRadius: "2rem",
+      marginLeft: "2rem",
+      marginRight: "2rem",
+      cursor: "pointer",
     },
   },
 };

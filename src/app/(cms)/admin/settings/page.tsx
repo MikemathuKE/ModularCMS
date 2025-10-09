@@ -111,6 +111,7 @@ export default function SettingsPage() {
                 <option value="FaTwitter">Twitter</option>
                 <option value="FaGithub">Github</option>
                 <option value="FaLinkedin">LinkedIn</option>
+                <option value="FaInstagram">Instagram</option>
               </select>
               {IconComp && <IconComp className="w-6 h-6 text-gray-700" />}
               <button

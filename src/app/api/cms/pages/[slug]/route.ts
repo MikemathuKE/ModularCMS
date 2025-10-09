@@ -11,7 +11,7 @@ export async function GET(
   const { slug } = params;
 
   try {
-    const page = await Page.findOne({ slug }).lean();
+    const page = await Page.findOne({ slug: slug }).lean();
     if (!page) {
       return NextResponse.json({ error: "Page not found" }, { status: 404 });
     }

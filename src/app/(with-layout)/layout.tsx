@@ -17,7 +17,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeProvider themeIdentifier={null}>
+        <ThemeProvider themeMode="light">
           <ThemeLayout>{children}</ThemeLayout>
         </ThemeProvider>
       </body>

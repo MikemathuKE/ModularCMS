@@ -101,8 +101,9 @@ export default function ThemesPage() {
               </div>
               <div className="flex gap-2">
                 <Link
-                  href={`/admin/themes/${theme._id}/preview`}
+                  href={`/preview/themes/${theme._id}`}
                   className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  target="_blank"
                 >
                   Preview
                 </Link>

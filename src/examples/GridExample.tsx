@@ -36,14 +36,14 @@ export default function ExampleGrid() {
           <Heading3>Card Title 2</Heading3>
         </CardHeader>
 
-        <ImageMedia
-          src="/images/MyLogo.png"
-          alt="Card Image 2"
-          width={200}
-          height={200}
-        />
-
         <CardContent>
+          <ImageMedia
+            src="/images/MyLogo.png"
+            alt="Card Image 2"
+            width={200}
+            height={200}
+          />
+
           <Paragraph>
             Pellentesque habitant morbi tristique senectus et netus et malesuada
             fames ac turpis egestas.
@@ -60,14 +60,14 @@ export default function ExampleGrid() {
           <Heading3>Card Title 3</Heading3>
         </CardHeader>
 
-        <ImageMedia
-          src="/images/MyLogo.png"
-          alt="Card Image 3"
-          width={200}
-          height={200}
-        />
-
         <CardContent>
+          <ImageMedia
+            src="/images/MyLogo.png"
+            alt="Card Image 3"
+            width={200}
+            height={200}
+          />
+
           <Paragraph>
             Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
             posuere cubilia curae.

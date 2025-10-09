@@ -1,9 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+
+import debounce from "lodash.debounce";
+import { useCallback } from "react";
+
 import { JSONNode } from "@/renderer/JsonRenderer";
 import { MetaComponentMap } from "@/renderer/metaComponentMap";
 import { renderJSONNode } from "@/renderer/JsonRenderer";
 import { ThemeProvider } from "@/context/ThemeContext";
+import RichTextEditor from "@/components/admin/RichTextEditor";
+
+import MediaSelector from "./MediaSelector";
 
 interface ComponentCategory {
   name: string;
@@ -52,6 +60,7 @@ const componentCategories: ComponentCategory[] = [
       "Paragraph",
       "Span",
       "Text",
+      "RichText",
     ],
   },
   {
@@ -98,11 +107,13 @@ export default function LayoutEditor({
   >([]);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [published, setPublished] = useState(false);
+  const [status, setPublished] = useState("draft");
   const [pageName, setPageName] = useState<string>("");
 
   const [layouts, setLayouts] = useState<string[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("default");
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [url, setUrl] = useState<string>("");
 
   // fetch available layouts
   useEffect(() => {
@@ -131,7 +142,7 @@ export default function LayoutEditor({
     fetch(`/api/cms/pages/${pageId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data?.published) setPublished(data.published);
+        if (data?.status) setPublished(data.status);
         if (data?.name) setPageName(data.name);
       })
       .catch(() => {});
@@ -206,6 +217,19 @@ export default function LayoutEditor({
     updateNodeAtPath(parentPath, { ...parent, children: newChildren });
     setSelectedNodePath([...parentPath, swapIndex]);
   };
+
+  const updatePropDebounce = useCallback(
+    debounce((propName: string, value: any) => {
+      const node = getNodeAtPath(selectedNodePath);
+      if (!node) return;
+      if (node.props?.[propName] === value) return; // no-op if unchanged
+      updateNodeAtPath(selectedNodePath, {
+        ...node,
+        props: { ...(node.props || {}), [propName]: value },
+      });
+    }, 1000),
+    [selectedNodePath]
+  );
 
   const updateProp = (propName: string, value: any) => {
     const node = getNodeAtPath(selectedNodePath);
@@ -286,41 +310,57 @@ export default function LayoutEditor({
   const renderPropInput = (propName: string, value: any, required = false) => {
     const type = typeof value;
     return (
-      <div key={propName} className="flex flex-col gap-1">
+      <div
+        key={selectedNodePath.join("-") + propName}
+        className="flex flex-col gap-1"
+      >
         <label className="font-medium">
           {propName}
           {required && <span className="text-red-500">*</span>}
         </label>
-        {type === "boolean" ? (
-          <input
-            type="checkbox"
-            checked={!!value}
-            onChange={(e) => updateProp(propName, e.target.checked)}
-          />
-        ) : type === "number" ? (
-          <input
-            type="number"
-            value={value ?? ""}
-            onChange={(e) => updateProp(propName, Number(e.target.value))}
-            className="border p-1 rounded"
-          />
-        ) : type === "object" ? (
-          <textarea
-            value={JSON.stringify(value, null, 2)}
-            onChange={(e) => {
-              try {
-                updateProp(propName, JSON.parse(e.target.value));
-              } catch {}
+        {propName === "src" ? (
+          <MediaSelector
+            key={selectedNodePath.join("-")}
+            type={"image"}
+            selected={formData[url]}
+            onSelect={(url) => {
+              setFormData({ ...formData });
+              setUrl(url);
+              updateProp(propName, String(url));
             }}
-            className="border p-1 rounded font-mono text-xs"
+          />
+        ) : propName === "richText" ? (
+          <RichTextEditor
+            key={selectedNodePath.join("-")}
+            value={value}
+            onChange={(html) => updatePropDebounce(propName, html)}
           />
         ) : (
-          <input
-            type="text"
-            value={value ?? ""}
-            onChange={(e) => updateProp(propName, e.target.value)}
-            className="border p-1 rounded"
-          />
+          <>
+            {type === "boolean" ? (
+              <input
+                key={selectedNodePath.join("-")}
+                type="checkbox"
+                checked={!!value}
+                onChange={(e) => updateProp(propName, e.target.checked)}
+              />
+            ) : type === "number" ? (
+              <input
+                key={selectedNodePath.join("-")}
+                type="number"
+                value={value ?? ""}
+                onChange={(e) => updateProp(propName, Number(e.target.value))}
+                className="border p-1 rounded"
+              />
+            ) : (
+              <textarea
+                key={selectedNodePath.join("-")}
+                value={value ?? ""}
+                onChange={(e) => updateProp(propName, e.target.value)}
+                className="border p-1 rounded"
+              />
+            )}
+          </>
         )}
       </div>
     );
@@ -337,7 +377,7 @@ export default function LayoutEditor({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           json: rootNode,
-          published,
+          status,
           layout: selectedLayout,
         }),
       });
@@ -355,18 +395,19 @@ export default function LayoutEditor({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b bg-white">
         <h1 className="font-semibold text-xl">
-          Layout Editor{" "}
+          Page Editor{" "}
           <span className="text-gray-500">({pageName + " page" || "..."})</span>
         </h1>
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={published}
-              onChange={(e) => setPublished(e.target.checked)}
-            />
-            Published
-          </label>
+          <label className="flex items-center gap-2 text-sm"> Status: </label>
+          <select
+            value={status}
+            onChange={(e) => setPublished(e.target.value)}
+            className="border rounded p-1"
+          >
+            <option value={"draft"}>Draft</option>
+            <option value={"published"}>Published</option>
+          </select>
           {/* Layout selector */}
           <label className="flex items-center gap-2 text-sm">
             Layout:
@@ -441,7 +482,7 @@ export default function LayoutEditor({
                 >
                   <option value="">None</option>
                   {Object.values(contentTypes).map((ct) => (
-                    <option key={ct.id} value={ct.id}>
+                    <option key={uuidv4()} value={ct.id}>
                       {ct.name}
                     </option>
                   ))}

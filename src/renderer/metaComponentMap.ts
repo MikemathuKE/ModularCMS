@@ -43,6 +43,7 @@ import {
   Paragraph,
   Span,
   Text,
+  RichText,
 } from "@/components/GeneralComponents";
 
 import {
@@ -430,6 +431,12 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       text: "Text",
     },
   },
+  RichText: {
+    component: RichText,
+    props: {
+      richText: "Text",
+    },
+  },
 
   // Media Components
   AudioMedia: {
@@ -465,7 +472,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-      src: "",
+      src: null,
       alt: "Image",
       width: 500,
       height: 500,

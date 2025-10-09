@@ -10,7 +10,15 @@ export interface ContentTypeDoc {
   slug: string; // e.g., "blogPost" -> collection: content_blogPost
   fields: Array<{
     name: string; // "title", "body", "image"
-    type: "string" | "number" | "boolean" | "date" | "json";
+    type:
+      | "string"
+      | "number"
+      | "boolean"
+      | "date"
+      | "json"
+      | "image"
+      | "video"
+      | "audio";
     required?: boolean;
     // (Optional) validation bits you may add later
   }>;
@@ -27,7 +35,16 @@ const ContentTypeSchema = new Schema<ContentTypeDoc>(
         name: { type: String, required: true },
         type: {
           type: String,
-          enum: ["string", "number", "boolean", "date", "json"],
+          enum: [
+            "string",
+            "number",
+            "boolean",
+            "date",
+            "json",
+            "image",
+            "video",
+            "audio",
+          ],
           required: true,
         },
         required: { type: Boolean, default: false },

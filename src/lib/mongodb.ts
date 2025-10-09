@@ -11,7 +11,7 @@ declare global {
 export async function dbConnect() {
   if (!global.__mongooseConn__) {
     global.__mongooseConn__ = mongoose.connect(MONGODB_URI, {
-      dbName: process.env.MONGODB_DB || "cms",
+      dbName: process.env.MONGODB_DB,
     });
   }
   return global.__mongooseConn__;
