@@ -350,6 +350,9 @@ export const defaultTheme: AppTheme = {
       width: "90%",
       maxWidth: "500px",
       boxShadow: "{{modalShadow}}",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
       // New properties (non-breaking additions)
       position: "fixed",
       top: "50%",

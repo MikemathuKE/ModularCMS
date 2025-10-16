@@ -8,7 +8,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [themeId, SetThemeId] = useState<string>("");
   useEffect(() => {
     async function getActiveTheme() {
-      const themeRes = await fetch("/api/themes/active");
+      const themeRes = await fetch("/api/cms/themes/active");
       const theme = await themeRes.json();
       console.log(theme);
       if (theme) SetThemeId(theme._id);

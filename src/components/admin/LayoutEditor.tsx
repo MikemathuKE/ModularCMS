@@ -11,7 +11,8 @@ import { renderJSONNode } from "@/renderer/JsonRenderer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 
-import MediaSelector from "./MediaSelector";
+import MediaSelector from "@/components/admin/MediaSelector";
+import { ModalManager } from "@/lib/ModalManager";
 
 interface ComponentCategory {
   name: string;
@@ -108,7 +109,7 @@ export default function LayoutEditor({
   const [selectedNodePath, setSelectedNodePath] = useState<number[]>([]);
   const [collapsedNodes, setCollapsedNodes] = useState<CollapsedState>({});
   const [contentTypes, setContentTypes] = useState<
-    { name: string; id: string }[]
+    { name: string; id: string; slug: string }[]
   >([]);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export default function LayoutEditor({
   useEffect(() => {
     fetch("/api/cms/content-types")
       .then((res) => res.json())
-      .then((data) => setContentTypes(data))
+      .then((data) => setContentTypes(data.items))
       .catch(() => setContentTypes([]));
   }, []);
 
@@ -312,7 +313,12 @@ export default function LayoutEditor({
     );
   };
 
-  const renderPropInput = (propName: string, value: any, required = false) => {
+  const renderPropInput = (
+    propName: string,
+    value: any,
+    propType: string,
+    required = false
+  ) => {
     const type = typeof value;
     return (
       <div
@@ -349,6 +355,35 @@ export default function LayoutEditor({
                 checked={!!value}
                 onChange={(e) => updateProp(propName, e.target.checked)}
               />
+            ) : propType.toLowerCase().includes("button") &&
+              propName == "modal" ? (
+              <select
+                className="border rounded px-2 py-1"
+                value={value}
+                onChange={(e) => updateProp(propName, e.target.value)}
+              >
+                <option value={""}>--Select Modal--</option>
+                {ModalManager.get()
+                  .keys()
+                  .map((value, idx) => (
+                    <option key={idx} value={value}>
+                      {value}
+                    </option>
+                  ))}
+              </select>
+            ) : propName == "contentType" ? (
+              <select
+                className="border rounded px-2 py-1"
+                value={value}
+                onChange={(e) => updateProp(propName, e.target.value)}
+              >
+                <option value={""}>--Select ContentType--</option>
+                {Object.values(contentTypes).map((value, idx) => (
+                  <option key={idx} value={value.slug}>
+                    {value.name}
+                  </option>
+                ))}
+              </select>
             ) : type === "number" ? (
               <input
                 key={selectedNodePath.join("-")}
@@ -476,7 +511,12 @@ export default function LayoutEditor({
               {Object.entries(
                 MetaComponentMap[selectedNode.component]?.props || {}
               ).map(([name, def]) =>
-                renderPropInput(name, selectedNode.props?.[name] ?? def, false)
+                renderPropInput(
+                  name,
+                  selectedNode.props?.[name] ?? def,
+                  selectedNode.component,
+                  false
+                )
               )}
               <div>
                 <label className="font-medium">Linked Content</label>

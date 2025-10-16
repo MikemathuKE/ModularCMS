@@ -23,4 +23,8 @@ export const ModalManager = {
   close(id: string) {
     modals.get(id)?.close();
   },
+  get() {
+    console.log(modals);
+    return modals;
+  },
 };
