@@ -4,9 +4,10 @@ import React from "react";
 import { useParams } from "next/navigation";
 
 import ExampleForm from "@/examples/FormExample";
-import { Heading2, Paragraph } from "@/components/GeneralComponents";
+import { Heading2, Heading3, Paragraph } from "@/components/GeneralComponents";
 
 import { Section, Card } from "@/components/LayoutComponents";
+import { Modal } from "@/components/ModalComponents";
 import ExampleGrid from "@/examples/GridExample";
 import ExampleMedia from "@/examples/MediaExample";
 import { ExampleTable } from "@/examples/TableExample";

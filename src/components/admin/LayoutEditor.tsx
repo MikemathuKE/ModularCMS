@@ -48,6 +48,10 @@ const componentCategories: ComponentCategory[] = [
     ],
   },
   {
+    name: "Modal Components",
+    components: ["Modal"],
+  },
+  {
     name: "General Components",
     components: [
       "Button",
@@ -61,6 +65,7 @@ const componentCategories: ComponentCategory[] = [
       "Span",
       "Text",
       "RichText",
+      "IconLink",
     ],
   },
   {

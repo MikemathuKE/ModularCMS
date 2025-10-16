@@ -1,7 +1,13 @@
 "use client";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
-import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { Button, Heading4, Span } from "./GeneralComponents";
 import Link from "next/link";
 import { JSONNode } from "@/renderer/JsonRenderer";

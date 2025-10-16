@@ -44,6 +44,7 @@ import {
   Span,
   Text,
   RichText,
+  IconLink,
 } from "@/components/GeneralComponents";
 
 import {
@@ -74,13 +75,14 @@ import {
 
 import { DataSection } from "@/components/DataSection";
 
+import { Modal, ModalBackdrop } from "@/components/ModalComponents";
+
 interface ComponentMeta<T> {
   component: React.ComponentType<T>;
   props: Partial<T>;
 }
 
 export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
-  // Data Components
   DataSection: {
     component: DataSection,
     props: {
@@ -339,11 +341,22 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     },
   },
 
+  ModalBackdrop: {
+    component: ModalBackdrop,
+    props: {},
+  },
+  Modal: {
+    component: Modal,
+    props: { id: null },
+  },
+
   // General Components
   Button: {
     component: Button,
     props: {
       id: null,
+      modal: null,
+      link: null,
       style: null,
       type: "button",
       disabled: false,
@@ -435,6 +448,15 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     component: RichText,
     props: {
       richText: "Text",
+    },
+  },
+  IconLink: {
+    component: IconLink,
+    props: {
+      url: "#",
+      color: "gray",
+      icon: "",
+      size: 24,
     },
   },
 

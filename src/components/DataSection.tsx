@@ -1,18 +1,8 @@
 "use client";
-import React, {
-  useEffect,
-  useState,
-  ReactNode,
-  isValidElement,
-  cloneElement,
-} from "react";
-import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
+import React, { useEffect, useState, ReactNode } from "react";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
-import {
-  replacePlaceholders,
-  resolveJSONPlaceholders,
-} from "@/renderer/renderUtils";
+import DataBlock from "@/components/DataBlock";
 
 export interface DataSectionProps extends CommonProps {
   contentType: string;
@@ -77,9 +67,13 @@ export const DataSection = createStyledComponent<DataSectionProps>(
         {data.items &&
           data.items.length > 0 &&
           data.items.map((item, idx) => (
-            <React.Fragment key={`${contentType}-${data.page}-${idx}`}>
-              {resolveDynamicChildren(children, item, idx)}
-            </React.Fragment>
+            <DataBlock
+              key={`${contentType}-${data.page}-${idx}`}
+              index={idx}
+              item={item}
+            >
+              {children}
+            </DataBlock>
           ))}
 
         {/* Pagination controls */}
@@ -109,55 +103,3 @@ export const DataSection = createStyledComponent<DataSectionProps>(
   },
   "DataSection"
 );
-
-/**
- * Handle both JSONNode and ReactNode children
- */
-function resolveDynamicChildren(
-  children: ReactNode,
-  item: Record<string, any>,
-  key?: number
-): ReactNode {
-  if (!children) return null;
-
-  // Case 1: JSONNode structure
-  if (typeof children === "object" && "component" in (children as any)) {
-    const resolved = resolveJSONPlaceholders(children as JSONNode, item);
-    return renderJSONNode(resolved);
-  }
-
-  // Case 2: Plain string
-  if (typeof children === "string") {
-    return replacePlaceholders(children, item);
-  }
-
-  // Case 3: React element
-  if (isValidElement(children)) {
-    const newProps: Record<string, any> = {};
-    for (const [propKey, value] of Object.entries(children.props || {})) {
-      if (typeof value === "string") {
-        newProps[propKey] = replacePlaceholders(value, item);
-      } else {
-        newProps[propKey] = value;
-      }
-    }
-
-    return cloneElement(
-      children,
-      { ...newProps, key },
-      children.props?.children
-        ? resolveDynamicChildren(children.props.children, item)
-        : undefined
-    );
-  }
-
-  // Case 4: Array of children
-  if (Array.isArray(children)) {
-    return children.map((child, i) =>
-      resolveDynamicChildren(child, item, `${key}-${i}`)
-    );
-  }
-
-  // Case 5: numbers / literals
-  return children;
-}

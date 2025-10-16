@@ -52,31 +52,81 @@ export interface ButtonProps extends CommonProps {
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
   autoFocus?: boolean;
-  name?: string;
-  value?: string | number | readonly string[];
-  form?: string;
-  formAction?: string;
-  formEncType?: string;
-  formMethod?: string;
-  formNoValidate?: boolean;
-  formTarget?: string;
+  // name?: string;
+  // value?: string | number | readonly string[];
+  // form?: string;
+  // formAction?: string;
+  // formEncType?: string;
+  // formMethod?: string;
+  // formNoValidate?: boolean;
+  // formTarget?: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
-  onKeyUp?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
-  className?: string;
-  tabIndex?: number;
-  title?: string;
-  role?: string;
+  // onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+  // onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
+  // onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  // onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  // onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  // onKeyUp?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  // className?: string;
+  // tabIndex?: number;
+  // title?: string;
+  // role?: string;
   children: React.ReactNode;
+  modal?: string;
+  link?: string;
+  data?: Record<string, any>;
 }
 
+import { useRouter } from "next/navigation";
+
+import { ModalManager } from "@/lib/ModalManager";
+
 export const Button = createStyledComponent<ButtonProps>(
-  ({ children, ...props }) => <button {...props}>{children}</button>,
+  ({ children, modal, data, link, onClick, ...props }: ButtonProps) => {
+    const router = useRouter();
+    function registerClick(event: React.MouseEvent<HTMLButtonElement>) {
+      if (modal) {
+        ModalManager.open(modal);
+        ModalManager.setData(modal, data);
+      } else if (link) {
+        router.push(link);
+      }
+      if (onClick) onClick(event);
+    }
+
+    return (
+      <button onClick={(e) => registerClick(e)} {...props}>
+        {children}
+      </button>
+    );
+  },
   "Button"
+);
+
+import * as Icons from "react-icons/fa"; // FontAwesome icons via react-icons
+
+export interface IconLinkProps extends CommonProps {
+  url: string;
+  icon: string;
+  color: string;
+  size: number;
+}
+
+export const IconLink = createStyledComponent<IconLinkProps>(
+  ({ url = "#", icon, color = "gray", size = 24, ...props }: IconLinkProps) => {
+    const IconComp = (Icons as any)[icon] || null;
+    return (
+      <a href={url}>
+        {IconComp && (
+          <IconComp
+            style={{ color: color, width: size, height: size }}
+            {...props}
+          />
+        )}
+      </a>
+    );
+  },
+  "IconLink"
 );
 
 export interface StringProps extends CommonProps {

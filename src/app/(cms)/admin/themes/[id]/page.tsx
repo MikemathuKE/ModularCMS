@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { HexColorPicker } from "react-colorful";
+
 import { defaultTheme } from "@/theme/DefaultTheme";
 import { renderJSONNode } from "@/renderer/JsonRenderer";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -649,6 +651,18 @@ export default function ThemeEditorPage() {
 
   function renderEditor(obj: any, path: string[] = []) {
     if (typeof obj !== "object" || obj === null) {
+      if (
+        path.toString().toLowerCase().includes("color") &&
+        !path.toString().includes("ColorInput") &&
+        obj.toString().includes("#")
+      ) {
+        return (
+          <HexColorPicker
+            color={obj}
+            onChange={(value) => updateValue(path, value)}
+          />
+        );
+      }
       return (
         <input
           type="text"

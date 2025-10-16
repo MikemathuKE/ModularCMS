@@ -8,9 +8,17 @@ import {
 import { Heading3, Paragraph, Button } from "@/components/GeneralComponents";
 import { ImageMedia } from "@/components/MediaComponents";
 
+import { Modal } from "@/components/ModalComponents";
+
 export default function ExampleGrid() {
   return (
     <Grid>
+      <Modal id="exampleModal">
+        <Heading3>Modal</Heading3>
+        <Paragraph>
+          This is a modal that has been called by clicking Read More!
+        </Paragraph>
+      </Modal>
       <Card>
         <ImageMedia
           src="/images/underwater.jpg"
@@ -27,7 +35,7 @@ export default function ExampleGrid() {
         </CardContent>
 
         <CardFooter>
-          <Button>Learn More</Button>
+          <Button modal="exampleModal">Learn More</Button>
         </CardFooter>
       </Card>
 
