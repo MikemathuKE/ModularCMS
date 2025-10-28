@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import User from "@/models/User";
+import { getTenantConnection } from "@/lib/mongodb";
+import { UserSchema } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 
@@ -11,6 +12,13 @@ export async function POST(req: Request) {
   await dbConnect();
 
   const { email, password } = await req.json();
+
+  const tenantSlug = req.headers.get("x-tenant");
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const User = tenantConn.model("User", UserSchema);
 
   const user = await User.findOne({ email });
   if (!user) {

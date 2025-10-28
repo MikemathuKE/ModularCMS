@@ -7,7 +7,7 @@ export interface UserDocument extends Document {
   createdAt: Date;
 }
 
-const UserSchema = new Schema<UserDocument>(
+export const UserSchema = new Schema<UserDocument>(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }, // hashed
