@@ -82,6 +82,9 @@ export const defaultTheme: AppTheme = {
       padding: "0.5rem 1rem",
       fontSize: "1rem",
       cursor: "pointer",
+      hover: {
+        color: "{{buttonHoverColor}}",
+      },
       transition: "background-color 0.3s ease",
     },
     TextInput: {
@@ -453,6 +456,9 @@ export const defaultTheme: AppTheme = {
       border: "1px solid {{pageButtonBorderColor}}",
       cursor: "pointer",
       borderRadius: "4px",
+      hover: {
+        color: "{{buttonHoverColor}}",
+      },
       transition: "background 0.3s ease",
     },
     TableHead: {

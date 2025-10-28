@@ -13,7 +13,16 @@ type StyleInput<Props = unknown> =
   | ((props: Props) => SafeCSSProperties)
   | undefined;
 
-export type ComponentStyleMap = Record<string, Partial<CSSProperties>>;
+export interface ExtendedCSSProperties extends CSSProperties {
+  hover?: CSSProperties;
+  focus?: CSSProperties;
+  active?: CSSProperties;
+  before?: CSSProperties;
+  after?: CSSProperties;
+  disabled?: CSSProperties;
+}
+
+export type ComponentStyleMap = Record<string, Partial<ExtendedCSSProperties>>;
 
 export interface ThemeVariables {
   light: Record<string, string>;
