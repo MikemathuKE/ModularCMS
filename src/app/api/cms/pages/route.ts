@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Page } from "@/models/Page";
+import { getOrCreatePageModel } from "@/models/Page";
+import { getTenantConnection } from "@/lib/mongodb";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 // GET all pages with optional filters, pagination, sorting, and search
 export async function GET(req: Request) {
@@ -36,6 +38,13 @@ export async function GET(req: Request) {
     } else {
       sort[sortParam] = 1;
     }
+
+    const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+    if (!tenantSlug)
+      return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+    const tenantConn = await getTenantConnection(tenantSlug);
+    const Page = getOrCreatePageModel(tenantConn);
 
     // Query
     const [pages, total] = await Promise.all([
@@ -75,6 +84,13 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+    if (!tenantSlug)
+      return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+    const tenantConn = await getTenantConnection(tenantSlug);
+    const Page = getOrCreatePageModel(tenantConn);
 
     // Ensure slug uniqueness
     const existing = await Page.findOne({ slug });

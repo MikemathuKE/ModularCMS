@@ -20,5 +20,9 @@ export const UserSchema = new Schema<UserDocument>(
   { timestamps: true }
 );
 
+export function getOrCreateUserModel(conn: Connection | any) {
+  return conn.models["User"] || conn.model("User", UserSchema);
+}
+
 const User = models.User || model("User", UserSchema);
 export default User;

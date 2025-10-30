@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Theme } from "@/models/Theme";
+import { getOrCreateThemeModel } from "@/models/Theme";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
+import { getTenantConnection } from "@/lib/mongodb";
 
 export async function GET(req: NextRequest) {
   await dbConnect();
@@ -20,6 +22,13 @@ export async function GET(req: NextRequest) {
         ],
       }
     : {};
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Theme = getOrCreateThemeModel(tenantConn);
 
   const total = await Theme.countDocuments(filter);
   const items = await Theme.find(filter)
@@ -47,6 +56,13 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Theme = getOrCreateThemeModel(tenantConn);
 
   const exists = await Theme.findOne({ slug }).lean();
   if (exists) {

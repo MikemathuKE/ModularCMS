@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { ContentType } from "@/models/ContentType";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
+import { getTenantConnection } from "@/lib/mongodb";
+import { getOrCreateContentTypeModel } from "@/models/ContentType";
 
 export async function GET(req: Request) {
   await dbConnect();
@@ -22,6 +24,13 @@ export async function GET(req: Request) {
 
   const skip = (page - 1) * limit;
 
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const [items, total] = await Promise.all([
     ContentType.find(query).skip(skip).limit(limit).sort({ updatedAt: -1 }),
     ContentType.countDocuments(query),
@@ -42,6 +51,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   await dbConnect();
   const body = await req.json();
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
 
   const exists = await ContentType.findOne({ slug: body.slug });
   if (exists) {

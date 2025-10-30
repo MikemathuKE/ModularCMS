@@ -1,4 +1,4 @@
-import { Schema, model, models, Types } from "mongoose";
+import { Schema, model, models, Types, Connection } from "mongoose";
 
 /**
  * Content Types define a schema (field model) and meta.
@@ -26,7 +26,7 @@ export interface ContentTypeDoc {
   createdAt: Date;
 }
 
-const ContentTypeSchema = new Schema<ContentTypeDoc>(
+export const ContentTypeSchema = new Schema<ContentTypeDoc>(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
@@ -53,6 +53,13 @@ const ContentTypeSchema = new Schema<ContentTypeDoc>(
   },
   { timestamps: true }
 );
+
+export function getOrCreateContentTypeModel(conn: Connection | any) {
+  return (
+    conn.models["ContentType"] ||
+    conn.model<ContentTypeDoc>("ContentType", ContentTypeSchema)
+  );
+}
 
 export const ContentType =
   models.ContentType || model<ContentTypeDoc>("ContentType", ContentTypeSchema);

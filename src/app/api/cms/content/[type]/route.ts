@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { ContentType } from "@/models/ContentType";
+import { getOrCreateContentTypeModel } from "@/models/ContentType";
 import { getContentModel } from "@/utils/getContentModel";
 import formidable from "formidable";
 import fs from "fs/promises";
 import path from "path";
+import { getTenantConnection } from "@/lib/mongodb";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 // GET all or single ?id=, supports pagination & search
 export async function GET(
@@ -12,6 +14,13 @@ export async function GET(
   { params }: { params: { type: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
@@ -19,7 +28,7 @@ export async function GET(
       { status: 404 }
     );
 
-  const Model = getContentModel(ct);
+  const Model = getContentModel(ct, tenantConn);
   const { searchParams } = new URL(req.url);
 
   // check for single item fetch
@@ -94,6 +103,13 @@ export async function POST(
   { params }: { params: { type: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct) {
     return NextResponse.json(
@@ -172,7 +188,7 @@ export async function POST(
     body = await req.json();
   }
 
-  const Model = getContentModel(ct);
+  const Model = getContentModel(ct, tenantConn);
   const doc = await Model.create(body);
 
   return NextResponse.json(doc, { status: 201 });
@@ -184,6 +200,13 @@ export async function PUT(
   { params }: { params: { type: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
@@ -196,7 +219,7 @@ export async function PUT(
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   const body = await req.json();
-  const Model = getContentModel(ct);
+  const Model = getContentModel(ct, tenantConn);
   const updated = await Model.findByIdAndUpdate(id, body, { new: true }).lean();
   if (!updated)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -210,6 +233,13 @@ export async function DELETE(
   { params }: { params: { type: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
@@ -221,7 +251,7 @@ export async function DELETE(
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  const Model = getContentModel(ct);
+  const Model = getContentModel(ct, tenantConn);
   const deleted = await Model.findByIdAndDelete(id).lean();
   if (!deleted)
     return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -33,7 +33,7 @@ export default function RegisterDomainPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="h-full w-full flex items-center justify-center bg-gray-50">
       <form
         onSubmit={handleSubmit}
         className="bg-white shadow-md rounded-lg p-8 w-full max-w-md"

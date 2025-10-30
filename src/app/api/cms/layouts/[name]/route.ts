@@ -1,12 +1,22 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import Layout from "@/models/Layout";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
+import { getTenantConnection } from "@/lib/mongodb";
+import { getOrCreateLayoutModel } from "@/models/Layout";
 
 export async function GET(
   req: Request,
   { params }: { params: { name: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Layout = getOrCreateLayoutModel(tenantConn);
+  console.log(params.name);
+
   const layout = await Layout.findOne({ name: await params.name }).lean();
   if (!layout) {
     return NextResponse.json({ error: "Layout not found" }, { status: 404 });
@@ -20,6 +30,13 @@ export async function POST(
 ) {
   await dbConnect();
   const body = await req.json();
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Layout = getOrCreateLayoutModel(tenantConn);
 
   const existing = await Layout.findOne({ name: params.name });
   if (existing) {
@@ -41,6 +58,13 @@ export async function DELETE(
   { params }: { params: { name: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Layout = getOrCreateLayoutModel(tenantConn);
+
   const result = await Layout.deleteOne({ name: params.name });
 
   if (result.deletedCount === 0) {

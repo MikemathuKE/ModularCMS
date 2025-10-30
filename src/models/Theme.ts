@@ -1,7 +1,7 @@
 // models/Theme.ts
 import mongoose, { Schema, model, models } from "mongoose";
 
-const ThemeSchema = new Schema(
+export const ThemeSchema = new Schema(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
@@ -11,6 +11,10 @@ const ThemeSchema = new Schema(
   },
   { timestamps: true }
 );
+
+export function getOrCreateThemeModel(conn: Connection | any) {
+  return conn.models["Theme"] || conn.model("Theme", ThemeSchema);
+}
 
 export const Theme = models.Theme || model("Theme", ThemeSchema);
 export type ThemeDoc = mongoose.InferSchemaType<typeof ThemeSchema>;

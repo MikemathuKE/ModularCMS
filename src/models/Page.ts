@@ -10,7 +10,7 @@ export interface IPage extends Document {
   updatedAt: Date;
 }
 
-const PageSchema = new Schema<IPage>(
+export const PageSchema = new Schema<IPage>(
   {
     name: { type: String, required: true, index: true },
     slug: { type: String, required: true, unique: true, index: true },
@@ -28,6 +28,10 @@ const PageSchema = new Schema<IPage>(
 
 // Ensure indexes exist in Mongo
 PageSchema.index({ name: "text", slug: "text" }); // allows text search on both
+
+export function getOrCreatePageModel(conn: Connection | any) {
+  return conn.models["Page"] || conn.model("Page", PageSchema);
+}
 
 export const Page: Model<IPage> =
   mongoose.models.Page || mongoose.model<IPage>("Page", PageSchema);

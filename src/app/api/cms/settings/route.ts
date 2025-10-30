@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, Connection } from "mongoose";
+
+import { getTenantConnection } from "@/lib/mongodb";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 const SocialLinkSchema = new Schema({
   name: { type: String, required: true },
@@ -20,10 +23,19 @@ const SettingsSchema = new Schema(
   { timestamps: true }
 );
 
-const Settings = models.Settings || model("Settings", SettingsSchema);
+export function getOrCreateSettingModel(conn: Connection | any) {
+  if (!conn) return models.Settings || model("Settings", SettingsSchema);
+  return conn.models["Settings"] || conn.model("Settings", SettingsSchema);
+}
 
-export async function GET() {
+export async function GET(req: Request) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Settings = getOrCreateSettingModel(tenantConn);
   let settings = await Settings.findOne().lean();
 
   if (!settings) {
@@ -36,6 +48,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   await dbConnect();
   const body = await req.json();
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Settings = getOrCreateSettingModel(tenantConn);
 
   let settings = await Settings.findOne();
   if (!settings) {

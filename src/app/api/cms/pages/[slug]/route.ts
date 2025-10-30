@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Page } from "@/models/Page";
+import { getOrCreatePageModel } from "@/models/Page";
+import { getTenantConnection } from "@/lib/mongodb";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 // GET a single page by slug
 export async function GET(
@@ -9,6 +11,13 @@ export async function GET(
 ) {
   await dbConnect();
   const { slug } = params;
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Page = getOrCreatePageModel(tenantConn);
 
   try {
     const page = await Page.findOne({ slug: slug }).lean();
@@ -33,6 +42,13 @@ export async function PUT(
 ) {
   await dbConnect();
   const { slug } = params;
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Page = getOrCreatePageModel(tenantConn);
 
   try {
     const body = await req.json();
@@ -70,6 +86,13 @@ export async function DELETE(
 ) {
   await dbConnect();
   const { slug } = params;
+
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Page = getOrCreatePageModel(tenantConn);
 
   try {
     const result = await Page.findOneAndDelete({ slug });

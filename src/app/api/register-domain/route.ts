@@ -3,25 +3,11 @@ import { NextResponse } from "next/server";
 import { dbConnect, getTenantConnection } from "@/lib/mongodb";
 import { Tenant } from "@/models/Tenant";
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
 import { defaultTheme } from "@/theme/DefaultTheme";
-
-// Models for initializing tenant DB
-const UserSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  role: { type: String, default: "admin" },
-});
-
-const ThemeSchema = new mongoose.Schema({
-  name: String,
-  settings: Object,
-});
-
-const LayoutSchema = new mongoose.Schema({
-  name: String,
-  structure: Object,
-});
+import { getOrCreateLayoutModel } from "@/models/Layout";
+import { getOrCreateThemeModel } from "@/models/Theme";
+import { getOrCreatePageModel } from "@/models/Page";
+import { getOrCreateContentTypeModel } from "@/models/ContentType";
 
 export async function POST(req: Request) {
   try {
@@ -52,9 +38,10 @@ export async function POST(req: Request) {
     const tenantConn = await getTenantConnection(slug);
 
     // Create models in tenant DB
-    const User = tenantConn.model("User", UserSchema);
-    const Theme = tenantConn.model("Theme", ThemeSchema);
-    const Layout = tenantConn.model("Layout", LayoutSchema);
+    const User = getOrCreateContentTypeModel(tenantConn);
+    const Theme = getOrCreateThemeModel(tenantConn);
+    const Layout = getOrCreateLayoutModel(tenantConn);
+    const Pages = getOrCreatePageModel(tenantConn);
 
     // Create admin user
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
@@ -83,6 +70,11 @@ export async function POST(req: Request) {
         sidebar: null,
         sections: null,
       },
+    });
+
+    await Pages.create({
+      name: "home",
+      slug: "home",
     });
 
     return NextResponse.json({ success: true, domain: tenant.domain });

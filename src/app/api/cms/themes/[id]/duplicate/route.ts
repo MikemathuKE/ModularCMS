@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { Theme } from "@/models/Theme";
+import { getOrCreateThemeModel } from "@/models/Theme";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
+import { getTenantConnection } from "@/lib/mongodb";
 
 export async function POST(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const Theme = getOrCreateThemeModel(tenantConn);
 
   const theme = await Theme.findById(params.id).lean();
   if (!theme) {

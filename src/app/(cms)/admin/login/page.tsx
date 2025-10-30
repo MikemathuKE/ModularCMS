@@ -38,10 +38,10 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gray-100">
+    <div className="top-0 left-0 absolute w-full h-full flex justify-center items-center bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 shadow-lg rounded-md w-80"
+        className="bg-white p-8 shadow-lg rounded-md w-80 flex-row"
       >
         <h1 className="text-2xl font-bold mb-4 text-center">
           {mode === "login" ? "Admin Login" : "Register"}

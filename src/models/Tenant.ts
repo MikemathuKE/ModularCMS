@@ -11,8 +11,8 @@ export interface ITenant extends Document {
 const TenantSchema = new Schema<ITenant>(
   {
     slug: { type: String, required: true, unique: true },
-    domain: { type: String },
-    customDomain: { type: String },
+    domain: { type: String, unique: true },
+    customDomain: { type: String, unique: true },
   },
   { timestamps: true }
 );

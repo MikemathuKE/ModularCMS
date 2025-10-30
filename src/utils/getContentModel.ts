@@ -5,7 +5,10 @@ import { ContentTypeDoc } from "@/models/ContentType";
  * Create a dynamic schema for the content type fields.
  * Each content type gets collection: content_<slug>
  */
-export function getContentModel(ct: ContentTypeDoc): Model<any> {
+export function getContentModel(
+  ct: ContentTypeDoc,
+  tenantConn: any = null
+): Model<any> {
   const modelName = `Content_${ct.slug}`; // Mongoose model cache key
   const collection = `content_${ct.slug}`; // Mongo collection name
 
@@ -29,5 +32,7 @@ export function getContentModel(ct: ContentTypeDoc): Model<any> {
   schemaShape.slug = { type: String, index: true };
 
   const dynamicSchema = new Schema(schemaShape, { timestamps: true });
+
+  if (tenantConn) tenantConn.model(modelName, dynamicSchema, collection);
   return model(modelName, dynamicSchema, collection);
 }

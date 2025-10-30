@@ -4,6 +4,7 @@ import { getTenantConnection } from "@/lib/mongodb";
 import { UserSchema } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const secretKey = new TextEncoder().encode(JWT_SECRET);
@@ -13,7 +14,7 @@ export async function POST(req: Request) {
 
   const { email, password } = await req.json();
 
-  const tenantSlug = req.headers.get("x-tenant");
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
     return Response.json({ error: "Tenant missing" }, { status: 400 });
 

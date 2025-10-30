@@ -22,5 +22,9 @@ const MediaSchema = new Schema<MediaDocument>(
   { timestamps: true }
 );
 
+export function getOrCreateMediaModel(conn: Connection | any) {
+  return conn.models["Media"] || conn.model("Media", MediaSchema);
+}
+
 export const Media =
   mongoose.models.Media || mongoose.model<MediaDocument>("Media", MediaSchema);

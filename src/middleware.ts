@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import { dbConnect } from "@/lib/mongodb";
-import { Tenant } from "@/models/Tenant";
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+};
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const secretKey = new TextEncoder().encode(JWT_SECRET);
@@ -17,40 +19,22 @@ async function verifyJWT(token?: string) {
   }
 }
 
-// Helper: Extract subdomain safely
-function extractSubdomain(host: string) {
-  // Remove port (e.g., "tenant.localhost:3000" → "tenant.localhost")
-  const cleanHost = host.split(":")[0];
-  const parts = cleanHost.split(".");
-
-  // For localhost or custom domain setup
-  if (cleanHost.endsWith("localhost")) {
-    return parts.length > 1 ? parts[0] : null; // tenant.localhost
-  }
-
-  // For standard domains: tenant.example.com
-  if (parts.length > 2) {
-    return parts[0]; // tenant
-  }
-
-  return null;
-}
-
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const token = req.cookies.get("token")?.value;
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isLoginRoute = pathname === "/login";
+  const url = req.nextUrl;
 
-  // 🔒 Protect /admin routes
-  if (isAdminRoute) {
-    const valid = await verifyJWT(token);
-    if (!valid) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
+  // Skip internal APIs and Next.js static assets
+  if (
+    url.pathname.startsWith("/api") ||
+    url.pathname.startsWith("/_next") ||
+    url.pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
   }
 
-  // 🚫 Redirect logged-in users away from /login
+  const token = req.cookies.get("token")?.value;
+  const isAdminRoute = url.pathname.startsWith("/admin");
+  const isLoginRoute = url.pathname === "/admin/login";
+
   if (isLoginRoute) {
     const valid = await verifyJWT(token);
     if (valid) {
@@ -58,40 +42,47 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  const hostname = req.headers.get("host") || "";
-  const url = req.nextUrl.clone();
+  if (isAdminRoute && !isLoginRoute) {
+    const valid = await verifyJWT(token);
+    if (!valid) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+  }
+
+  // Extract subdomain (e.g., tenant.example.com → tenant)
+  const host = req.headers.get("host") || "";
+  const [subdomain] = host.split(".");
+
+  // Skip main domain
+  if (!subdomain || subdomain === "www" || host.includes("localhost")) {
+    return NextResponse.next();
+  }
 
   try {
-    await dbConnect();
+    // IMPORTANT: absolute URL (Edge runtime doesn’t know localhost implicitly)
+    const res = await fetch(
+      `${req.nextUrl.origin}/api/tenant/lookup?subdomain=${subdomain}`,
+      {
+        headers: { "x-internal-request": "middleware" },
+      }
+    );
 
-    const subdomain = extractSubdomain(hostname);
-    let tenant = null;
+    if (!res.ok) throw new Error(`Lookup failed: ${res.status}`);
 
-    if (subdomain) {
-      // Try subdomain-based lookup
-      tenant = await Tenant.findOne({ domain: subdomain });
-    } else {
-      // Try full custom domain lookup (for custom domains)
-      tenant = await Tenant.findOne({ domain: hostname });
+    const tenant = await res.json();
+
+    if (!tenant?.exists) {
+      // Redirect to domain registration
+      // return NextResponse.redirect(new URL("/admin/register-domain", req.url));
+      return NextResponse.next();
     }
 
-    if (!tenant) {
-      console.warn(`No tenant found for host: ${hostname}`);
-      url.pathname = "/register-domain";
-      return NextResponse.redirect(url);
-    }
-
+    // Attach tenant to request (optional)
     const response = NextResponse.next();
-    response.headers.set("x-tenant", "tenant_" + tenant.slug);
+    response.headers.set("x-tenant", tenant.name);
     return response;
-  } catch (err) {
-    console.error("Middleware tenant lookup error:", err);
-    url.pathname = "/register-domain";
-    return NextResponse.redirect(url);
+  } catch (error) {
+    console.error("Tenant lookup error:", error);
+    return NextResponse.next(); // fallback gracefully
   }
 }
-
-export const config = {
-  matcher: ["/admin/:path*", "/login"],
-  runtime: "nodejs",
-};

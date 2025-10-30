@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { ContentType } from "@/models/ContentType";
+import { getOrCreateContentTypeModel } from "@/models/ContentType";
 import { getContentModel } from "@/utils/getContentModel";
+import { getTenantConnection } from "@/lib/mongodb";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 export async function GET(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: { type: string; id: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
@@ -25,6 +34,13 @@ export async function PUT(
   { params }: { params: { type: string; id: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
@@ -41,10 +57,17 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: { type: string; id: string } }
 ) {
   await dbConnect();
+  const tenantSlug = await GetTenantSlug(req.headers.get("host"));
+  if (!tenantSlug)
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
+
+  const tenantConn = await getTenantConnection(tenantSlug);
+  const ContentType = getOrCreateContentTypeModel(tenantConn);
+
   const ct = await ContentType.findOne({ slug: params.type }).lean();
   if (!ct)
     return NextResponse.json(
