@@ -5,7 +5,12 @@ import {
   CardHeader,
   CardFooter,
 } from "@/components/LayoutComponents";
-import { Heading3, Paragraph, Button } from "@/components/GeneralComponents";
+import {
+  Heading3,
+  Paragraph,
+  Button,
+  Text,
+} from "@/components/GeneralComponents";
 import { ImageMedia } from "@/components/MediaComponents";
 
 import { Modal } from "@/components/ModalComponents";
@@ -16,7 +21,7 @@ export default function ExampleGrid() {
       <Modal id="exampleModal">
         <Heading3>Modal</Heading3>
         <Paragraph>
-          This is a modal that has been called by clicking Read More!
+          <Text text="This is a modal that has been called by clicking Read More!"></Text>
         </Paragraph>
       </Modal>
       <Card>
@@ -29,13 +34,17 @@ export default function ExampleGrid() {
 
         <CardContent>
           <Paragraph>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at
-            sapien eu lorem bibendum congue.
+            <Text
+              text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed at
+            sapien eu lorem bibendum congue."
+            ></Text>
           </Paragraph>
         </CardContent>
 
         <CardFooter>
-          <Button modal="exampleModal">Learn More</Button>
+          <Button modal="exampleModal">
+            <Text text="Learn More"></Text>
+          </Button>
         </CardFooter>
       </Card>
 
@@ -53,19 +62,25 @@ export default function ExampleGrid() {
           />
 
           <Paragraph>
-            Pellentesque habitant morbi tristique senectus et netus et malesuada
-            fames ac turpis egestas.
+            <Text
+              text="Pellentesque habitant morbi tristique senectus et netus et malesuada
+            fames ac turpis egestas."
+            ></Text>
           </Paragraph>
         </CardContent>
 
         <CardFooter>
-          <Button>Explore</Button>
+          <Button>
+            <Text text="Explore"></Text>
+          </Button>
         </CardFooter>
       </Card>
 
       <Card>
         <CardHeader>
-          <Heading3>Card Title 3</Heading3>
+          <Heading3>
+            <Text text="Card Title 3"></Text>
+          </Heading3>
         </CardHeader>
 
         <CardContent>
@@ -77,13 +92,17 @@ export default function ExampleGrid() {
           />
 
           <Paragraph>
-            Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
-            posuere cubilia curae.
+            <Text
+              text="Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
+            posuere cubilia curae."
+            ></Text>
           </Paragraph>
         </CardContent>
 
         <CardFooter>
-          <Button>Read More</Button>
+          <Button>
+            <Text text="Read More"></Text>
+          </Button>
         </CardFooter>
       </Card>
     </Grid>

@@ -108,31 +108,28 @@ export default function ThemesPage() {
                   Preview
                 </Link>
 
-                {theme.slug !== "default" ? (
-                  <>
-                    <Link
-                      href={`/admin/themes/${theme._id}`}
-                      className="px-3 py-1 bg-yellow-200 rounded hover:bg-yellow-300"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => deleteTheme(theme._id)}
-                      className="px-3 py-1 bg-red-200 rounded hover:bg-red-300"
-                    >
-                      Delete
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => duplicateTheme(theme._id)}
-                      className="px-3 py-1 bg-blue-200 rounded hover:bg-blue-300"
-                    >
-                      Duplicate
-                    </button>
-                  </>
-                )}
+                <>
+                  <Link
+                    href={`/admin/themes/${theme._id}`}
+                    className="px-3 py-1 bg-yellow-200 rounded hover:bg-yellow-300"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => deleteTheme(theme._id)}
+                    className="px-3 py-1 bg-red-200 rounded hover:bg-red-300"
+                  >
+                    Delete
+                  </button>
+                </>
+                <>
+                  <button
+                    onClick={() => duplicateTheme(theme._id)}
+                    className="px-3 py-1 bg-blue-200 rounded hover:bg-blue-300"
+                  >
+                    Duplicate
+                  </button>
+                </>
 
                 {!theme.active && (
                   <button

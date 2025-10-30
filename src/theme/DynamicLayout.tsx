@@ -50,18 +50,24 @@ export default function DynamicLayout({
   return (
     <PageContainer>
       {config.topbar !== null && (
-        <Topbar>{renderJSONNode(config.topbar as JSONNode)}</Topbar>
+        <Topbar>
+          {config.topbar ? renderJSONNode(config.topbar as JSONNode) : ""}
+        </Topbar>
       )}
       <Main>
         {config.sidebar !== null && (
-          <Sidebar>{renderJSONNode(config.sidebar as JSONNode)}</Sidebar>
+          <Sidebar>
+            {config.sidebar ? renderJSONNode(config.sidebar as JSONNode) : ""}
+          </Sidebar>
         )}
         <Info style={config.sidebar === null ? { marginLeft: 0 } : {}}>
           {children}
         </Info>
       </Main>
       {config.footer !== null && (
-        <Footer>{renderJSONNode(config.footer as JSONNode)}</Footer>
+        <Footer>
+          {config.footer ? renderJSONNode(config.footer as JSONNode) : ""}
+        </Footer>
       )}
     </PageContainer>
   );

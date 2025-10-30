@@ -7,7 +7,7 @@ import { defaultTheme } from "@/theme/DefaultTheme";
 import { getOrCreateLayoutModel } from "@/models/Layout";
 import { getOrCreateThemeModel } from "@/models/Theme";
 import { getOrCreatePageModel } from "@/models/Page";
-import { getOrCreateContentTypeModel } from "@/models/ContentType";
+import { getOrCreateUserModel } from "@/models/User";
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     const tenantConn = await getTenantConnection(slug);
 
     // Create models in tenant DB
-    const User = getOrCreateContentTypeModel(tenantConn);
+    const User = getOrCreateUserModel(tenantConn);
     const Theme = getOrCreateThemeModel(tenantConn);
     const Layout = getOrCreateLayoutModel(tenantConn);
     const Pages = getOrCreatePageModel(tenantConn);
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
     await Layout.create({
       name: "default",
-      structure: {
+      config: {
         topbar: {
           component: "",
           children: [],
