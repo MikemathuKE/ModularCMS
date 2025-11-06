@@ -3,7 +3,10 @@ import { MetaComponentMap } from "@/renderer/metaComponentMap";
 
 export interface JSONNode {
   component: string;
-  props?: Record<string, any>;
+  props?: {
+    style?: React.CSSProperties;
+    [key: string]: any;
+  };
   children?: Array<JSONNode | string | number>;
 }
 

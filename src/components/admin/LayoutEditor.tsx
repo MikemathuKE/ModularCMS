@@ -10,6 +10,7 @@ import { MetaComponentMap } from "@/renderer/metaComponentMap";
 import { renderJSONNode } from "@/renderer/JsonRenderer";
 import { ThemeProvider } from "@/context/ThemeContext";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import StyleEditor from "@/components/admin/StyleEditor";
 
 import MediaSelector from "@/components/admin/MediaSelector";
 import { ModalManager } from "@/lib/ModalManager";
@@ -346,6 +347,11 @@ export default function LayoutEditor({
             value={value}
             onChange={(html) => updatePropDebounce(propName, html)}
           />
+        ) : propName === "style" ? (
+          <StyleEditor
+            style={value || {}}
+            onChange={(style) => updateProp(propName, style)}
+          />
         ) : (
           <>
             {type === "boolean" ? (
@@ -518,6 +524,7 @@ export default function LayoutEditor({
                   false
                 )
               )}
+
               <div>
                 <label className="font-medium">Linked Content</label>
                 <select
