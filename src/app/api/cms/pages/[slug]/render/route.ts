@@ -6,7 +6,7 @@ import { getTenantConnection } from "@/lib/mongodb";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 export async function GET(
-  _: NextRequest,
+  req: NextRequest,
   { params }: { params: { slug: string } }
 ) {
   await dbConnect();

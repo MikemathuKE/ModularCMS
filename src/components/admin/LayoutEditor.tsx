@@ -122,6 +122,73 @@ export default function LayoutEditor({
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [url, setUrl] = useState<string>("");
 
+  // 🟢 NEW: Track the node currently being dragged
+  const [draggingPath, setDraggingPath] = useState<number[] | null>(null);
+  // 🟢 Optional: Track the node currently hovered as drop target
+  const [dragOverPath, setDragOverPath] = useState<number[] | null>(null);
+  const [dropTarget, setDropTarget] = useState<{
+    path: number[];
+    position: "above" | "below" | null;
+  } | null>(null);
+
+  // 🟢 NEW: Move node between sibling positions or into a parent
+  const moveNodeToPath = (
+    sourcePath: number[],
+    targetPath: number[],
+    position: "above" | "below" | "inside" = "below"
+  ) => {
+    if (sourcePath.join("-") === targetPath.join("-")) return;
+
+    const sourceParentPath = sourcePath.slice(0, -1);
+    const sourceIndex = sourcePath[sourcePath.length - 1];
+    const sourceParent = getNodeAtPath(sourceParentPath);
+    if (!sourceParent || !sourceParent.children) return;
+
+    // The node being moved
+    const movingNode = sourceParent.children[sourceIndex];
+
+    // Remove it from the source first
+    const newSourceChildren = sourceParent.children.filter(
+      (_, i) => i !== sourceIndex
+    );
+    updateNodeAtPath(sourceParentPath, {
+      ...sourceParent,
+      children: newSourceChildren,
+    });
+
+    // Now figure out target insertion
+    const targetParentPath = targetPath.slice(0, -1);
+    const targetIndex = targetPath[targetPath.length - 1];
+    const targetParent = getNodeAtPath(targetParentPath);
+
+    // Prevent dropping into self or descendant
+    if (targetPath.join("-").startsWith(sourcePath.join("-"))) return;
+
+    if (!targetParent || !targetParent.children) {
+      // root or missing parent case — append to root
+      if (position === "inside") {
+        const targetNode = getNodeAtPath(targetPath);
+        if (!targetNode) return;
+        updateNodeAtPath(targetPath, {
+          ...targetNode,
+          children: [...(targetNode.children || []), movingNode],
+        });
+      }
+      return;
+    }
+
+    let insertIndex = targetIndex;
+    if (position === "below") insertIndex = targetIndex + 1;
+
+    const newChildren = [...targetParent.children];
+    newChildren.splice(insertIndex, 0, movingNode);
+
+    updateNodeAtPath(targetParentPath, {
+      ...targetParent,
+      children: newChildren,
+    });
+  };
+
   // fetch available layouts
   useEffect(() => {
     fetch("/api/cms/layouts")
@@ -234,7 +301,7 @@ export default function LayoutEditor({
         ...node,
         props: { ...(node.props || {}), [propName]: value },
       });
-    }, 1000),
+    }, 3000),
     [selectedNodePath]
   );
 
@@ -255,12 +322,47 @@ export default function LayoutEditor({
     const parent = getNodeAtPath(path.slice(0, -1));
     return (
       <div key={path.join("-")} className="ml-4">
+        {/* 🟢 Drop Zone ABOVE */}
         <div
-          className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer ${
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDropTarget({ path, position: "above" });
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (!draggingPath) return;
+            moveNodeToPath(draggingPath, path, "above");
+            setDraggingPath(null);
+            setDropTarget(null);
+          }}
+          className={`h-2 transition-all ${
+            dropTarget &&
+            dropTarget.path.join("-") === path.join("-") &&
+            dropTarget.position === "above"
+              ? "bg-yellow-400"
+              : "bg-transparent"
+          }`}
+        />
+        <div
+          className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer border-l ${
             selectedNodePath.join("-") === path.join("-")
               ? "bg-blue-100"
+              : dragOverPath && dragOverPath.join("-") === path.join("-")
+              ? "bg-green-100"
+              : draggingPath && draggingPath.join("-") === path.join("-")
+              ? "bg-yellow-100"
               : "hover:bg-gray-100"
           }`}
+          draggable // 🟢 allow native drag
+          onDragStart={(e) => {
+            e.stopPropagation();
+            setDraggingPath(path);
+            e.dataTransfer.effectAllowed = "move";
+          }}
+          onDragOver={() => {}}
+          onDrop={() => {}}
+          onDragLeave={() => setDragOverPath(null)}
+          onDragEnd={() => setDraggingPath(null)}
           onClick={() => setSelectedNodePath(path)}
         >
           {node.children && node.children.length > 0 && (
@@ -274,7 +376,10 @@ export default function LayoutEditor({
               {isCollapsed ? "+" : "-"}
             </button>
           )}
-          <span className="font-mono">{node.component || "<Root>"}</span>
+          <span className="font-mono">
+            {node.component || "<Root>"}{" "}
+            {node.props?.id ? "(" + node.props?.id + ")" : ""}
+          </span>
           {/* Controls */}
           {path.length > 0 && (
             <div className="ml-auto flex gap-1">
@@ -308,6 +413,27 @@ export default function LayoutEditor({
             </div>
           )}
         </div>
+        {/* 🟢 Drop Zone BELOW */}
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDropTarget({ path, position: "below" });
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (!draggingPath) return;
+            moveNodeToPath(draggingPath, path, "below");
+            setDraggingPath(null);
+            setDropTarget(null);
+          }}
+          className={`h-2 transition-all ${
+            dropTarget &&
+            dropTarget.path.join("-") === path.join("-") &&
+            dropTarget.position === "below"
+              ? "bg-blue-400"
+              : "bg-transparent"
+          }`}
+        />
         {!isCollapsed &&
           node.children?.map((child, i) => renderTree(child, [...path, i]))}
       </div>
