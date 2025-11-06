@@ -12,6 +12,7 @@ import { Button, Heading4, Span } from "./GeneralComponents";
 import Link from "next/link";
 import { JSONNode } from "@/renderer/JsonRenderer";
 import { useThemeMode } from "@/lib/DynamicStyles";
+import { LayoutPresets, LayoutType } from "@/utils/layoutPresets";
 
 export interface CustomChildrenProps extends CommonProps {
   children?: React.ReactNode;
@@ -143,11 +144,28 @@ export const Footer = createStyledComponent<CustomChildrenProps>(
   ),
   "Footer"
 );
-export const Section = createStyledComponent<CustomChildrenProps>(
-  ({ children, ...props }: CustomChildrenProps) => (
-    <section {...props}>{children}</section>
+
+export interface LayoutProps extends CustomChildrenProps {
+  layout?: LayoutType;
+  gap?: string;
+}
+
+export const Section = createStyledComponent<LayoutProps>(
+  ({ children, layout, ...props }: LayoutProps) => (
+    <section {...props} style={layout ? LayoutPresets[layout] : {}}>
+      {children}
+    </section>
   ),
   "Section"
+);
+
+export const Layout = createStyledComponent<LayoutProps>(
+  ({ children, layout, ...props }: LayoutProps) => (
+    <div {...props} style={layout ? LayoutPresets[layout] : {}}>
+      {children}
+    </div>
+  ),
+  "Layout"
 );
 
 // Card

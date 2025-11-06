@@ -14,6 +14,7 @@ import StyleEditor from "@/components/admin/StyleEditor";
 
 import MediaSelector from "@/components/admin/MediaSelector";
 import { ModalManager } from "@/lib/ModalManager";
+import { LayoutPresets } from "@/utils/layoutPresets";
 
 interface ComponentCategory {
   name: string;
@@ -46,6 +47,7 @@ const componentCategories: ComponentCategory[] = [
       // "TableRow",
       // "TableData",
       "ALink",
+      "Layout",
       // "PaginationWrapper",
     ],
   },
@@ -478,6 +480,20 @@ export default function LayoutEditor({
             style={value || {}}
             onChange={(style) => updateProp(propName, style)}
           />
+        ) : propName === "layout" ? (
+          <select
+            value={value || ""}
+            onChange={(e) => {
+              updateProp(propName, e.target.value);
+            }}
+          >
+            <option value={null}>None</option>
+            {Object.entries(LayoutPresets).map(([key, value]) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
         ) : (
           <>
             {type === "boolean" ? (

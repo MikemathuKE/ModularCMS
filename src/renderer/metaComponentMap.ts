@@ -182,6 +182,15 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
+      layout: null,
+    },
+  },
+  Layout: {
+    component: Section,
+    props: {
+      id: null,
+      style: null,
+      layout: null,
     },
   },
   Card: {

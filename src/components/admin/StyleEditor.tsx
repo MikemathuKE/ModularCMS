@@ -1,6 +1,7 @@
 // components/admin/StyleEditor.tsx
 "use client";
 import React, { useState } from "react";
+import { HexColorPicker } from "react-colorful";
 
 interface StyleEditorProps {
   style: React.CSSProperties;
@@ -25,6 +26,14 @@ const cssKeys = [
   "textAlign",
 ];
 
+const alignItemsList = [
+  "flex-start",
+  "flex-end",
+  "center",
+  "baseline",
+  "stretch",
+];
+
 export default function StyleEditor({ style, onChange }: StyleEditorProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -45,13 +54,20 @@ export default function StyleEditor({ style, onChange }: StyleEditorProps) {
           {cssKeys.map((key) => (
             <div key={key} className="flex justify-between items-center gap-2">
               <label className="text-sm flex-1">{key}</label>
-              <input
-                type="text"
-                className="border rounded p-1 text-sm flex-1"
-                value={(style as any)[key] ?? ""}
-                placeholder="e.g. 20px, red"
-                onChange={(e) => handleStyleChange(key, e.target.value)}
-              />
+              {key.toLowerCase().includes("color") ? (
+                <HexColorPicker
+                  color={(style as any)[key] ?? "#000000"}
+                  onChange={(value) => handleStyleChange(key, value)}
+                />
+              ) : (
+                <input
+                  type="text"
+                  className="border rounded p-1 text-sm flex-1"
+                  value={(style as any)[key] ?? ""}
+                  placeholder="e.g. 20px, red"
+                  onChange={(e) => handleStyleChange(key, e.target.value)}
+                />
+              )}
             </div>
           ))}
         </div>
