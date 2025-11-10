@@ -1,4 +1,4 @@
-import { ContentType } from "@/models/ContentType";
+import { ContentType, ContentTypeDoc } from "@/models/ContentType";
 import { getContentModel } from "@/utils/getContentModel";
 
 type JSONNode = {
@@ -45,7 +45,7 @@ export async function resolvePageJSON(node: JSONNode): Promise<JSONNode> {
       template,
     } = node.dataSource;
 
-    const ct = await ContentType.findOne({ slug: type }).lean();
+    const ct = await ContentType.findOne({ slug: type }).lean<ContentTypeDoc>();
     if (!ct) {
       return {
         ...node,

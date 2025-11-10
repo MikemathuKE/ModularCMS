@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Connection } from "mongoose";
 
 export interface MediaDocument extends Document {
   filename: string;

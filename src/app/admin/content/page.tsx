@@ -19,7 +19,7 @@ export default function ContentPage() {
     async function fetchTypes() {
       setLoading(true);
       const res = await fetch(
-        `/api/cms/content-types?search=${encodeURIComponent(search)}`
+        `/api/cms/contenttypes?search=${encodeURIComponent(search)}`
       );
       const data = await res.json();
       setContentTypes(data.items || []);
@@ -33,7 +33,7 @@ export default function ContentPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Content</h1>
         <Link
-          href="/admin/content-types/new"
+          href="/admin/contenttypes/new"
           className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
         >
           Add Content Type

@@ -1,6 +1,7 @@
 import { dbConnect, getTenantConnection } from "@/lib/mongodb";
+import { SettingsSchema } from "@/models/Settings";
 import { Tenant } from "@/models/Tenant";
-import UserSchema from "@/models/User";
+import { UserSchema } from "@/models/User";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   // Initialize tenant-specific DB
   const tenantConn = await getTenantConnection(subdomain);
   const User = tenantConn.model("User", UserSchema);
+  const Setting = tenantConn.model("Settings", SettingsSchema);
 
   const hashed = await bcrypt.hash(password, 10);
   await User.create({
@@ -33,7 +35,7 @@ export async function POST(req: Request) {
     role: "admin",
   });
 
-  await tenantConn.collection("settings").insertOne({
+  await Setting.insertOne({
     theme: "default",
     layout: "default",
   });

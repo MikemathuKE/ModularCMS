@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import path from "path";
 import fs from "fs/promises";
@@ -8,9 +8,11 @@ import { getTenantConnection } from "@/lib/mongodb";
 import { getOrCreateMediaModel } from "@/models/Media";
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -19,7 +21,7 @@ export async function DELETE(
   const tenantConn = await getTenantConnection(tenantSlug);
   const Media = getOrCreateMediaModel(tenantConn);
 
-  const media = await Media.findById(params.id);
+  const media = await Media.findById(id);
   if (!media) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

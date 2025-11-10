@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, CSSProperties } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import debounce from "lodash.debounce";
@@ -121,7 +121,9 @@ export default function LayoutEditor({
 
   const [layouts, setLayouts] = useState<string[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("default");
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<
+    Record<string, object | string | boolean | number>
+  >({});
   const [url, setUrl] = useState<string>("");
 
   // 🟢 NEW: Track the node currently being dragged
@@ -201,7 +203,7 @@ export default function LayoutEditor({
 
   // fetch content types
   useEffect(() => {
-    fetch("/api/cms/content-types")
+    fetch("/api/cms/contenttypes")
       .then((res) => res.json())
       .then((data) => setContentTypes(data.items))
       .catch(() => setContentTypes([]));
@@ -225,10 +227,10 @@ export default function LayoutEditor({
   }, [pageId]);
 
   const getNodeAtPath = (path: number[]): JSONNode | null => {
-    let node: any = rootNode;
+    let node: JSONNode = rootNode;
     for (const i of path) {
       if (!node.children || !node.children[i]) return null;
-      node = node.children[i];
+      node = node.children[i] as JSONNode;
     }
     return node;
   };
@@ -237,8 +239,9 @@ export default function LayoutEditor({
     const recursiveUpdate = (node: JSONNode, p: number[]): JSONNode => {
       if (p.length === 0) return newNode;
       const [index, ...rest] = p;
-      const children = node.children?.map((child, i) =>
-        i === index ? recursiveUpdate(child, rest) : child
+      const children = node.children?.map(
+        (child: string | number | JSONNode | null, i: number) =>
+          i === index ? recursiveUpdate(child as JSONNode, rest) : child
       );
       return { ...node, children };
     };
@@ -295,7 +298,7 @@ export default function LayoutEditor({
   };
 
   const updatePropDebounce = useCallback(
-    debounce((propName: string, value: any) => {
+    debounce((propName: string, value: string | number) => {
       const node = getNodeAtPath(selectedNodePath);
       if (!node) return;
       if (node.props?.[propName] === value) return; // no-op if unchanged
@@ -307,7 +310,10 @@ export default function LayoutEditor({
     [selectedNodePath]
   );
 
-  const updateProp = (propName: string, value: any) => {
+  const updateProp = (
+    propName: string,
+    value: string | number | CSSProperties | null | boolean
+  ) => {
     const node = getNodeAtPath(selectedNodePath);
     if (!node) return;
     const props = { ...(node.props || {}), [propName]: value };
@@ -437,14 +443,16 @@ export default function LayoutEditor({
           }`}
         />
         {!isCollapsed &&
-          node.children?.map((child, i) => renderTree(child, [...path, i]))}
+          node.children?.map((child, i) =>
+            renderTree(child as JSONNode, [...path, i])
+          )}
       </div>
     );
   };
 
   const renderPropInput = (
     propName: string,
-    value: any,
+    value: string | number | boolean | object,
     propType: string,
     required = false
   ) => {
@@ -462,7 +470,7 @@ export default function LayoutEditor({
           <MediaSelector
             key={selectedNodePath.join("-")}
             type={"image"}
-            selected={formData[url]}
+            selected={formData[url] as string}
             onSelect={(url) => {
               setFormData({ ...formData });
               setUrl(url);
@@ -472,22 +480,22 @@ export default function LayoutEditor({
         ) : propName === "richText" ? (
           <RichTextEditor
             key={selectedNodePath.join("-")}
-            value={value}
+            value={value as string}
             onChange={(html) => updatePropDebounce(propName, html)}
           />
         ) : propName === "style" ? (
           <StyleEditor
-            style={value || {}}
+            style={(value as object) || {}}
             onChange={(style) => updateProp(propName, style)}
           />
         ) : propName === "layout" ? (
           <select
-            value={value || ""}
+            value={(value as string) || ""}
             onChange={(e) => {
-              updateProp(propName, e.target.value);
+              updateProp(propName, e.target.value ? e.target.value : null);
             }}
           >
-            <option value={null}>None</option>
+            <option value={undefined}>None</option>
             {Object.entries(LayoutPresets).map(([key, value]) => (
               <option key={key} value={key}>
                 {key}
@@ -500,14 +508,14 @@ export default function LayoutEditor({
               <input
                 key={selectedNodePath.join("-")}
                 type="checkbox"
-                checked={!!value}
+                checked={!!value as boolean}
                 onChange={(e) => updateProp(propName, e.target.checked)}
               />
             ) : propType.toLowerCase().includes("button") &&
               propName == "modal" ? (
               <select
                 className="border rounded px-2 py-1"
-                value={value}
+                value={value as string}
                 onChange={(e) => updateProp(propName, e.target.value)}
               >
                 <option value={""}>--Select Modal--</option>
@@ -522,13 +530,13 @@ export default function LayoutEditor({
             ) : propName == "contentType" ? (
               <select
                 className="border rounded px-2 py-1"
-                value={value}
+                value={value as string}
                 onChange={(e) => updateProp(propName, e.target.value)}
               >
                 <option value={""}>--Select ContentType--</option>
-                {Object.values(contentTypes).map((value, idx) => (
-                  <option key={idx} value={value.slug}>
-                    {value.name}
+                {Object.values(contentTypes).map((val, idx) => (
+                  <option key={idx} value={val.slug}>
+                    {val.name}
                   </option>
                 ))}
               </select>
@@ -536,14 +544,14 @@ export default function LayoutEditor({
               <input
                 key={selectedNodePath.join("-")}
                 type="number"
-                value={value ?? ""}
+                value={(value as string) ?? ""}
                 onChange={(e) => updateProp(propName, Number(e.target.value))}
                 className="border p-1 rounded"
               />
             ) : (
               <textarea
                 key={selectedNodePath.join("-")}
-                value={value ?? ""}
+                value={(value as string) ?? ""}
                 onChange={(e) => updateProp(propName, e.target.value)}
                 className="border p-1 rounded"
               />

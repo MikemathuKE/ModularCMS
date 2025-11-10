@@ -42,7 +42,7 @@ export default function ContentTypesPage() {
         ...(search ? { search } : {}),
       });
 
-      const res = await fetch(`/api/cms/content-types?${params.toString()}`);
+      const res = await fetch(`/api/cms/contenttypes?${params.toString()}`);
       const data = await res.json();
       setContentTypes(data.items || []);
       setPagination(data.pagination);
@@ -57,7 +57,7 @@ export default function ContentTypesPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Content Types</h1>
         <Link
-          href="/admin/content-types/new"
+          href="/admin/contenttypes/new"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Add Content Type
@@ -127,7 +127,7 @@ export default function ContentTypesPage() {
                   </td>
                   <td className="border px-4 py-2">
                     <Link
-                      href={`/admin/content-types/edit/${ct.slug}`}
+                      href={`/admin/contenttypes/edit/${ct.slug}`}
                       className="text-blue-600 hover:underline"
                     >
                       Edit

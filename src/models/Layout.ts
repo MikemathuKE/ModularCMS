@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, models } from "mongoose";
+import mongoose, { Schema, Document, models, Connection } from "mongoose";
 import { JSONNode } from "@/renderer/JsonRenderer";
 
 export interface LayoutConfig {

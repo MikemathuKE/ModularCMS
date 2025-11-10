@@ -7,7 +7,7 @@ export interface JSONNode {
     style?: React.CSSProperties;
     [key: string]: any;
   };
-  children?: Array<JSONNode | string | number>;
+  children?: Array<JSONNode | string | number | null>;
 }
 
 interface RendererOptions {
@@ -34,7 +34,9 @@ export function renderJSONNode(
       <React.Fragment key={getKey()}>
         {Array.isArray(children)
           ? children.map((child) =>
-              typeof child === "object" ? renderJSONNode(child, options) : child
+              typeof child === "object"
+                ? renderJSONNode(child as JSONNode, options)
+                : child
             )
           : null}
       </React.Fragment>
@@ -62,7 +64,9 @@ export function renderJSONNode(
 
   const renderedChildren = Array.isArray(children)
     ? children.map((child) =>
-        typeof child === "object" ? renderJSONNode(child, options) : child
+        typeof child === "object"
+          ? renderJSONNode(child as JSONNode, options)
+          : child
       )
     : undefined;
 

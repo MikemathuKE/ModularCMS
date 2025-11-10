@@ -1,6 +1,7 @@
 import type { AppTheme } from "@/lib/DynamicStyles";
 
 export const defaultTheme: AppTheme = {
+  layout: "default",
   variables: {
     light: {
       primaryColor: "#2563eb",

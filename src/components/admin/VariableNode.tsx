@@ -13,7 +13,7 @@ export type SerializedVariableNode = Spread<
   SerializedLexicalNode
 >;
 
-export class VariableNode extends DecoratorNode<JSX.Element> {
+export class VariableNode extends DecoratorNode<React.ReactElement> {
   __path: string;
 
   static getType(): string {
@@ -29,7 +29,7 @@ export class VariableNode extends DecoratorNode<JSX.Element> {
     this.__path = path;
   }
 
-  decorate(): JSX.Element {
+  decorate(): React.ReactElement {
     return (
       <span
         contentEditable={false}

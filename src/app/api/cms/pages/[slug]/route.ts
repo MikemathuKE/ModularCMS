@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { getOrCreatePageModel } from "@/models/Page";
 import { getTenantConnection } from "@/lib/mongodb";
@@ -6,11 +6,12 @@ import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 // GET a single page by slug
 export async function GET(
-  req: Request,
-  { params }: { params: { slug: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params;
+
   await dbConnect();
-  const { slug } = params;
 
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -36,12 +37,11 @@ export async function GET(
 }
 
 // UPDATE page (status + json)
-export async function PUT(
-  req: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function PUT(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const slug = searchParams.get("slug");
+
   await dbConnect();
-  const { slug } = params;
 
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -80,12 +80,11 @@ export async function PUT(
 }
 
 // DELETE page by slug
-export async function DELETE(
-  req: Request,
-  { params }: { params: { slug: string } }
-) {
+export async function DELETE(req: NextRequest) {
+  const searchParams = req.nextUrl.searchParams;
+  const slug = searchParams.get("slug");
+
   await dbConnect();
-  const { slug } = params;
 
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)

@@ -1,3 +1,4 @@
+import { JSONNode } from "@/renderer/JsonRenderer";
 type FormatterFn = (val: any) => string;
 
 const formatters: Record<string, FormatterFn> = {
@@ -40,7 +41,7 @@ export function replacePlaceholders(
       formatter = parts[1].trim();
     }
 
-    let value = getNestedValue(item, path);
+    const value = getNestedValue(item, path);
 
     if (value == null || value === "") {
       return fallback ?? "";

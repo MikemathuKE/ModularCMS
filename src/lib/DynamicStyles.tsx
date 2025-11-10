@@ -32,6 +32,7 @@ export interface ThemeVariables {
 export interface AppTheme {
   componentStyles: ComponentStyleMap;
   variables: ThemeVariables;
+  layout: "default" | string;
   themeMode?: "light" | "dark";
 }
 
@@ -60,6 +61,7 @@ export const ThemeProvider: React.FC<{
     () => ({
       theme: { ...initialTheme, themeMode },
       themeMode,
+      layout: initialTheme?.layout || "default",
       setThemeMode,
     }),
     [initialTheme, themeMode]

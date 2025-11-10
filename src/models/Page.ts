@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, Connection } from "mongoose";
 
 export interface IPage extends Document {
   name: string;

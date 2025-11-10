@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
 import { getTenantConnection } from "@/lib/mongodb";
 import { getOrCreateLayoutModel } from "@/models/Layout";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { name: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ name: string }> }
 ) {
+  const { name } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -15,9 +17,8 @@ export async function GET(
 
   const tenantConn = await getTenantConnection(tenantSlug);
   const Layout = getOrCreateLayoutModel(tenantConn);
-  console.log(params.name);
 
-  const layout = await Layout.findOne({ name: await params.name }).lean();
+  const layout = await Layout.findOne({ name: await name }).lean();
   if (!layout) {
     return NextResponse.json({ error: "Layout not found" }, { status: 404 });
   }
@@ -25,9 +26,11 @@ export async function GET(
 }
 
 export async function POST(
-  req: Request,
-  { params }: { params: { name: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ name: string }> }
 ) {
+  const { name } = await params;
+
   await dbConnect();
   const body = await req.json();
 
@@ -38,10 +41,10 @@ export async function POST(
   const tenantConn = await getTenantConnection(tenantSlug);
   const Layout = getOrCreateLayoutModel(tenantConn);
 
-  const existing = await Layout.findOne({ name: params.name });
+  const existing = await Layout.findOne({ name: name });
   if (existing) {
     const updated = await Layout.findOneAndUpdate(
-      { name: params.name },
+      { name: name },
       {
         ...body,
       }
@@ -49,14 +52,16 @@ export async function POST(
     return NextResponse.json(updated);
   }
 
-  await Layout.create({ name: params.name, config: body });
+  await Layout.create({ name: name, config: body });
   return NextResponse.json({ success: true });
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { name: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ name: string }> }
 ) {
+  const { name } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -65,7 +70,7 @@ export async function DELETE(
   const tenantConn = await getTenantConnection(tenantSlug);
   const Layout = getOrCreateLayoutModel(tenantConn);
 
-  const result = await Layout.deleteOne({ name: params.name });
+  const result = await Layout.deleteOne({ name: name });
 
   if (result.deletedCount === 0) {
     return NextResponse.json({ error: "Layout not found" }, { status: 404 });

@@ -43,7 +43,7 @@ export async function updateSession() {
     return null;
   }
 
-  const expires = new Date(Date.now() + expiration_days * 24 * 60 * 60);
+  // const expires = new Date(Date.now() + expiration_days * 24 * 60 * 60);
 
   const cookieStore = await cookies();
   cookieStore.set("session", session, {

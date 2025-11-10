@@ -3,6 +3,7 @@ import { dbConnect } from "@/lib/mongodb";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
 import { getTenantConnection } from "@/lib/mongodb";
 import { getOrCreateLayoutModel } from "@/models/Layout";
+import { LayoutDocument } from "@/models/Layout";
 
 export async function GET(req: Request) {
   await dbConnect();
@@ -13,6 +14,6 @@ export async function GET(req: Request) {
   const tenantConn = await getTenantConnection(tenantSlug);
   const Layout = getOrCreateLayoutModel(tenantConn);
 
-  const layouts = await Layout.find({}, "name").lean();
+  const layouts: LayoutDocument[] = await Layout.find({}, "name").lean();
   return NextResponse.json({ layouts: layouts.map((l) => l.name) });
 }

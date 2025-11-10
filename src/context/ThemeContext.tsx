@@ -21,6 +21,7 @@ export const ThemeProvider = ({
 
   const [theme, setTheme] = useState<AppTheme>(initialTheme);
   const [mode, setMode] = useState<"light" | "dark">(themeMode);
+  const [layout, SetLayout] = useState<string>("default");
 
   async function getTheme(): Promise<void> {
     try {
@@ -44,6 +45,7 @@ export const ThemeProvider = ({
       if (result && Object.keys(result).length !== 0) {
         const loaded = result["json"] as AppTheme;
         setTheme({ ...loaded, themeMode: mode });
+        SetLayout(loaded.layout);
       } else {
         setTheme({ ...defaultTheme, themeMode: mode });
       }
@@ -65,6 +67,7 @@ export const ThemeProvider = ({
     () => ({
       theme,
       themeMode: mode,
+      layout: layout,
       setThemeMode: setMode,
     }),
     [theme, mode]

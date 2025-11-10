@@ -414,7 +414,7 @@ export interface TableProps<T> extends CommonProps {
   onPageChange: (page: number) => void;
 
   contentType?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, object | boolean | string | number>;
   sort?: Record<string, 1 | -1>;
   limit?: number;
   displayColumns?: string; //comma separated list of columns
@@ -620,7 +620,7 @@ export const Table = createStyledComponent<TableProps<any>>(
                           <TableData key={key}>{row[col]}</TableData>
                         ))
                       : Object.values(row).map((data, key) => (
-                          <TableData key={key}>{data}</TableData>
+                          <TableData key={key}>{data as string}</TableData>
                         ))}
                   </TableRow>
                 ))}
@@ -664,7 +664,7 @@ export const ThemeModeSwitch = createStyledComponent<ThemeModeSwitchProps>(
     useEffect(() => {
       const savedTheme = localStorage.getItem("themeMode");
       if (savedTheme && typeof savedTheme === "string")
-        setThemeMode(savedTheme);
+        setThemeMode(savedTheme as "light" | "dark");
     }, []);
 
     const toggleMode = () => {

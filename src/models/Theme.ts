@@ -1,5 +1,5 @@
 // models/Theme.ts
-import mongoose, { Schema, model, models } from "mongoose";
+import mongoose, { Schema, model, models, Connection } from "mongoose";
 
 export const ThemeSchema = new Schema(
   {

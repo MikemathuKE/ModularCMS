@@ -1,5 +1,20 @@
 import { Schema, model, models, Types, Connection } from "mongoose";
 
+export interface ContentTypeField {
+  name: string; // "title", "body", "image"
+  type:
+    | "string"
+    | "number"
+    | "boolean"
+    | "date"
+    | "json"
+    | "image"
+    | "video"
+    | "audio";
+  required?: boolean;
+  // (Optional) validation bits you may add later
+}
+
 /**
  * Content Types define a schema (field model) and meta.
  * We'll generate a collection per content type using a dynamic model.
@@ -8,20 +23,7 @@ export interface ContentTypeDoc {
   _id: Types.ObjectId;
   name: string; // e.g., "Blog Post"
   slug: string; // e.g., "blogPost" -> collection: content_blogPost
-  fields: Array<{
-    name: string; // "title", "body", "image"
-    type:
-      | "string"
-      | "number"
-      | "boolean"
-      | "date"
-      | "json"
-      | "image"
-      | "video"
-      | "audio";
-    required?: boolean;
-    // (Optional) validation bits you may add later
-  }>;
+  fields: Array<ContentTypeField>;
   updatedAt: Date;
   createdAt: Date;
 }
@@ -56,8 +58,7 @@ export const ContentTypeSchema = new Schema<ContentTypeDoc>(
 
 export function getOrCreateContentTypeModel(conn: Connection | any) {
   return (
-    conn.models["ContentType"] ||
-    conn.model<ContentTypeDoc>("ContentType", ContentTypeSchema)
+    conn.models["ContentType"] || conn.model("ContentType", ContentTypeSchema)
   );
 }
 

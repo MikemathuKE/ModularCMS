@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import path from "path";
 import fs from "fs/promises";
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ items, total, page, limit });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   await dbConnect();
 
   const formData = await req.formData();

@@ -9,7 +9,7 @@ const navItems = [
   { name: "Pages", path: "/admin/pages" },
   { name: "Media", path: "/admin/media" },
   { name: "Content", path: "/admin/content" },
-  { name: "Content Types", path: "/admin/content-types" },
+  { name: "Content Types", path: "/admin/contenttypes" },
   { name: "Theme", path: "/admin/themes" },
   { name: "Settings", path: "/admin/settings" },
 ];

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { getOrCreateContentTypeModel } from "@/models/ContentType";
+import {
+  ContentTypeField,
+  getOrCreateContentTypeModel,
+} from "@/models/ContentType";
 import { getContentModel } from "@/utils/getContentModel";
 import formidable from "formidable";
 import fs from "fs/promises";
@@ -11,8 +14,10 @@ import { GetTenantSlug } from "@/utils/getTenantSlug";
 // GET all or single ?id=, supports pagination & search
 export async function GET(
   req: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<{ type: string }> }
 ) {
+  const { type } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -21,7 +26,7 @@ export async function GET(
   const tenantConn = await getTenantConnection(tenantSlug);
   const ContentType = getOrCreateContentTypeModel(tenantConn);
 
-  const ct = await ContentType.findOne({ slug: params.type }).lean();
+  const ct = await ContentType.findOne({ slug: type }).lean();
   if (!ct)
     return NextResponse.json(
       { error: "Unknown content type" },
@@ -49,7 +54,9 @@ export async function GET(
   if (search) {
     // do a generic search across all string fields
     const stringFields = ct.fields
-      .filter((f: any) => ["Text", "Textarea", "Email"].includes(f.type))
+      .filter((f: ContentTypeField) =>
+        ["Text", "Textarea", "Email"].includes(f.type)
+      )
       .map((f: any) => f.name);
 
     if (stringFields.length > 0) {
@@ -100,8 +107,10 @@ function getUploadDir(fieldType: string) {
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<{ type: string }> }
 ) {
+  const { type } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -110,7 +119,7 @@ export async function POST(
   const tenantConn = await getTenantConnection(tenantSlug);
   const ContentType = getOrCreateContentTypeModel(tenantConn);
 
-  const ct = await ContentType.findOne({ slug: params.type }).lean();
+  const ct = await ContentType.findOne({ slug: type }).lean();
   if (!ct) {
     return NextResponse.json(
       { error: "Unknown content type" },
@@ -197,8 +206,10 @@ export async function POST(
 // PUT update by id
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<{ type: string }> }
 ) {
+  const { type } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -207,7 +218,7 @@ export async function PUT(
   const tenantConn = await getTenantConnection(tenantSlug);
   const ContentType = getOrCreateContentTypeModel(tenantConn);
 
-  const ct = await ContentType.findOne({ slug: params.type }).lean();
+  const ct = await ContentType.findOne({ slug: type }).lean();
   if (!ct)
     return NextResponse.json(
       { error: "Unknown content type" },
@@ -230,8 +241,10 @@ export async function PUT(
 // DELETE by id
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { type: string } }
+  { params }: { params: Promise<{ type: string }> }
 ) {
+  const { type } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -240,7 +253,7 @@ export async function DELETE(
   const tenantConn = await getTenantConnection(tenantSlug);
   const ContentType = getOrCreateContentTypeModel(tenantConn);
 
-  const ct = await ContentType.findOne({ slug: params.type }).lean();
+  const ct = await ContentType.findOne({ slug: type }).lean();
   if (!ct)
     return NextResponse.json(
       { error: "Unknown content type" },

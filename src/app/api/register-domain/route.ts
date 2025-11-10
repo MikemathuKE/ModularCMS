@@ -78,8 +78,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, domain: tenant.domain });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error registering domain:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error instanceof Error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

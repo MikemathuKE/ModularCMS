@@ -5,10 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { HexColorPicker } from "react-colorful";
 
 import { defaultTheme } from "@/theme/DefaultTheme";
-import { renderJSONNode } from "@/renderer/JsonRenderer";
+import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
 import { ThemeProvider } from "@/context/ThemeContext";
 
-const TestPage = {
+const TestPage: JSONNode = {
   component: "PageContainer",
   children: [
     {

@@ -1,13 +1,15 @@
-// app/admin/content-types/new/page.tsx
+// app/admin/contenttypes/[slug]/edit/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
-export default function NewContentTypePage() {
+export default function EditContentTypePage() {
+  const { slug } = useParams();
   const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [fields, setFields] = useState<
     { name: string; type: string; required?: boolean }[]
   >([]);
@@ -17,15 +19,28 @@ export default function NewContentTypePage() {
     required: false,
   });
 
-  async function createType(e: React.FormEvent) {
+  useEffect(() => {
+    async function fetchType() {
+      const res = await fetch(`/api/cms/contenttypes/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        setName(data.name);
+        setFields(data.fields);
+        setLoading(false);
+      }
+    }
+    fetchType();
+  }, [slug]);
+
+  async function updateType(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/cms/content-types", {
-      method: "POST",
+    const res = await fetch(`/api/cms/contenttypes/${slug}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug, fields }),
+      body: JSON.stringify({ name, fields }),
     });
     if (res.ok) {
-      router.push("/admin/content-types");
+      router.push("/admin/contenttypes");
     } else {
       console.error(await res.json());
     }
@@ -37,11 +52,13 @@ export default function NewContentTypePage() {
     setNewField({ name: "", type: "string", required: false });
   }
 
+  if (loading) return <p className="p-6">Loading...</p>;
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-xl font-semibold mb-4">New Content Type</h1>
+      <h1 className="text-xl font-semibold mb-4">Edit Content Type: {name}</h1>
       <form
-        onSubmit={createType}
+        onSubmit={updateType}
         className="space-y-4 border rounded-lg p-4 bg-white shadow"
       >
         <div>
@@ -51,16 +68,6 @@ export default function NewContentTypePage() {
             className="mt-1 block w-full border rounded px-2 py-1"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium">Slug</label>
-          <input
-            type="text"
-            className="mt-1 block w-full border rounded px-2 py-1"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
             required
           />
         </div>
@@ -85,6 +92,9 @@ export default function NewContentTypePage() {
               }
             >
               <option value="string">String</option>
+              <option value="text">Text</option>
+              <option value="email">Email</option>
+              <option value="password">Password</option>
               <option value="number">Number</option>
               <option value="boolean">Boolean</option>
               <option value="date">Date</option>
@@ -119,6 +129,8 @@ export default function NewContentTypePage() {
                   {f.name} ({f.type}) {f.required && "*"}
                 </li>
               ))}
+              <li className="text-gray-500">createdAt (date)</li>
+              <li className="text-gray-500">updatedAt (date)</li>
             </ul>
           )}
         </div>
@@ -127,7 +139,7 @@ export default function NewContentTypePage() {
           type="submit"
           className="bg-green-600 text-white px-4 py-2 rounded"
         >
-          Save Content Type
+          Save Changes
         </button>
       </form>
     </div>

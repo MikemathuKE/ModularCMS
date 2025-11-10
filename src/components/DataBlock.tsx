@@ -1,4 +1,9 @@
-import React, { ReactNode, isValidElement, cloneElement } from "react";
+import React, {
+  ReactNode,
+  isValidElement,
+  cloneElement,
+  ReactElement,
+} from "react";
 import { JSONNode, renderJSONNode } from "@/renderer/JsonRenderer";
 import { CommonProps } from "@/lib/globals";
 import {
@@ -8,7 +13,7 @@ import {
 
 export interface DataBlockProps extends CommonProps {
   index: number;
-  item: any;
+  item: Record<string, string | object | boolean | number>;
   children?: React.ReactNode;
 }
 
@@ -29,15 +34,18 @@ export default function DataBlock({
  */
 export function resolveDynamicChildren(
   children: ReactNode,
-  item: Record<string, any>,
-  key?: number
+  item: Record<string, string | object | boolean | number>,
+  key?: number | string
 ): ReactNode {
   if (!children) return null;
 
   // Case 1: JSONNode structure
-  if (typeof children === "object" && "component" in (children as any)) {
-    const resolved = resolveJSONPlaceholders(children as JSONNode, item);
-    return renderJSONNode(resolved);
+  if (typeof children === "object" && "component" in children) {
+    const resolved = resolveJSONPlaceholders(
+      children as unknown as JSONNode,
+      item
+    );
+    return renderJSONNode(resolved as JSONNode);
   }
 
   // Case 2: Plain string
@@ -47,20 +55,24 @@ export function resolveDynamicChildren(
 
   // Case 3: React element
   if (isValidElement(children)) {
-    const newProps: Record<string, any> = {};
-    for (const [propKey, value] of Object.entries(children.props || {})) {
+    const element = children as ReactElement<any>; // ✅ type assertion
+
+    const newProps: Record<string, string | object | boolean | number> = {};
+    for (const [propKey, value] of Object.entries(element.props)) {
       if (typeof value === "string") {
         newProps[propKey] = replacePlaceholders(value, item);
+      } else if (!value) {
+        continue;
       } else {
         newProps[propKey] = value;
       }
     }
 
     return cloneElement(
-      children,
+      element,
       { ...newProps, key },
-      children.props?.children
-        ? resolveDynamicChildren(children.props.children, item)
+      element.props?.children
+        ? resolveDynamicChildren(element.props.children, item)
         : undefined
     );
   }

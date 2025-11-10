@@ -7,8 +7,10 @@ import { GetTenantSlug } from "@/utils/getTenantSlug";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -18,7 +20,7 @@ export async function GET(
   const Page = getOrCreatePageModel(tenantConn);
 
   const page = await Page.findOne({
-    slug: params.slug,
+    slug: slug,
     status: "published",
   }).lean();
   if (!page) return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -6,8 +6,10 @@ import { getTenantConnection } from "@/lib/mongodb";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
@@ -16,7 +18,7 @@ export async function POST(
   const tenantConn = await getTenantConnection(tenantSlug);
   const Theme = getOrCreateThemeModel(tenantConn);
 
-  const theme = await Theme.findById(params.id).lean();
+  const theme = await Theme.findById(id).lean();
   if (!theme) {
     return NextResponse.json({ error: "Theme not found" }, { status: 404 });
   }

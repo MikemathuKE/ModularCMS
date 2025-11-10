@@ -15,7 +15,10 @@ export async function GET(req: NextRequest) {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
     const user = await User.findById(decoded.id).lean();
-    return NextResponse.json({ user: { email: user.email, role: user.role } });
+    if (!user) return NextResponse.json({ user: null });
+    return NextResponse.json({
+      user: { email: user.values.email, role: user.values.role },
+    });
   } catch {
     return NextResponse.json({ user: null });
   }

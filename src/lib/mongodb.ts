@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import { Tenant } from "@/models/Tenant";
+import { Connection } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 if (!MONGODB_URI) throw new Error("MONGODB_URI not set");
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mongooseConn__: Promise<typeof mongoose> | undefined;
-  var __tenantConnections__: Record<string, typeof mongoose> | undefined;
+  var __tenantConnections__: Record<string, Connection> | undefined;
 }
 
 export async function dbConnect() {
@@ -22,18 +22,17 @@ export async function dbConnect() {
 /**
  * Dynamically connect to a tenant-specific database
  */
-export async function getTenantConnection(tenantSlug: string) {
+export async function getTenantConnection(
+  tenantSlug: string
+): Promise<Connection> {
   if (!tenantSlug) throw new Error("Tenant slug required");
 
   if (!global.__tenantConnections__) global.__tenantConnections__ = {};
 
-  // ✅ Cache per-tenant connections to avoid duplicate connections
   if (!global.__tenantConnections__[tenantSlug]) {
     const tenantDbName = `tenant_${tenantSlug}`;
     const connection = await mongoose
-      .createConnection(MONGODB_URI, {
-        dbName: tenantDbName,
-      })
+      .createConnection(MONGODB_URI, { dbName: tenantDbName })
       .asPromise();
 
     global.__tenantConnections__[tenantSlug] = connection;

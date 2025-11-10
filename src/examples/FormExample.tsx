@@ -103,7 +103,7 @@ export default function ExampleForm() {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} contentType="null" formTitle="Form">
       <Heading3>Contact Form</Heading3>
       <FieldWrapper label="Name" error={errors.name}>
         <TextInput name="name" value={data.name} onChange={handleChange} />

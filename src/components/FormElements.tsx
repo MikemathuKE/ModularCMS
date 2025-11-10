@@ -69,7 +69,7 @@ export const Form = createStyledComponent<CustomFormProps>(
     useEffect(() => {
       async function fetchSchema() {
         try {
-          const res = await fetch(`/api/cms/content-types/${contentType}`);
+          const res = await fetch(`/api/cms/contenttypes/${contentType}`);
           const schema = await res.json();
           setFields(schema.fields || []);
           // initialize values
@@ -245,11 +245,7 @@ export const Form = createStyledComponent<CustomFormProps>(
         {/* Extra manual children */}
         {children}
 
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
+        <Button type="submit" disabled={submitting}>
           {submitting ? "Submitting..." : "Submit"}
         </Button>
       </form>

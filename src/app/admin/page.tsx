@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
             </Link>
 
             <Link
-              href="/admin/content-types"
+              href="/admin/contenttypes"
               className="bg-white shadow rounded-lg p-6 hover:shadow-lg transition"
             >
               <h2 className="text-lg font-semibold">Content Types</h2>
