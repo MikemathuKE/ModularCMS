@@ -183,6 +183,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       id: null,
       style: null,
       layout: null,
+      transition: null,
     },
   },
   Layout: {
@@ -191,6 +192,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
       id: null,
       style: null,
       layout: null,
+      transition: null,
     },
   },
   Card: {

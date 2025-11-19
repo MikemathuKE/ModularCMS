@@ -37,7 +37,7 @@ export default function RegisterDomainPage() {
     if (res.ok) {
       setMessage(`Domain registered successfully: ${data.domain}`);
       setMessageIsError(false);
-      router.replace(`${data.domain}`);
+      router.push(`/admin/tenants`);
     } else {
       setMessage(`Error: ${data.error}`);
       setMessageIsError(true);

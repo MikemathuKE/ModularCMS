@@ -26,7 +26,7 @@ export default function AuthPage() {
 
     if (res.ok) {
       if (mode === "login") {
-        router.push("/admin");
+        router.refresh();
       } else {
         // After registering, auto-login or switch to login mode
         alert("Registration successful! You can now log in.");

@@ -15,6 +15,7 @@ import StyleEditor from "@/components/admin/StyleEditor";
 import MediaSelector from "@/components/admin/MediaSelector";
 import { ModalManager } from "@/lib/ModalManager";
 import { LayoutPresets } from "@/utils/layoutPresets";
+import { TransitionPresets } from "@/theme/transition";
 
 interface ComponentCategory {
   name: string;
@@ -126,6 +127,11 @@ export default function LayoutEditor({
   >({});
   const [url, setUrl] = useState<string>("");
 
+  const [reparentMode, setReparentMode] = useState(false);
+  const [nodeToReparentPath, setNodeToReparentPath] = useState<number[] | null>(
+    null
+  );
+
   // 🟢 NEW: Track the node currently being dragged
   const [draggingPath, setDraggingPath] = useState<number[] | null>(null);
   // 🟢 Optional: Track the node currently hovered as drop target
@@ -168,18 +174,18 @@ export default function LayoutEditor({
     // Prevent dropping into self or descendant
     if (targetPath.join("-").startsWith(sourcePath.join("-"))) return;
 
-    if (!targetParent || !targetParent.children) {
-      // root or missing parent case — append to root
-      if (position === "inside") {
-        const targetNode = getNodeAtPath(targetPath);
-        if (!targetNode) return;
-        updateNodeAtPath(targetPath, {
-          ...targetNode,
-          children: [...(targetNode.children || []), movingNode],
-        });
-      }
+    if (position === "inside") {
+      const targetNode = getNodeAtPath(targetPath);
+      if (!targetNode) return;
+      const updatedChildren = [...(targetNode.children || []), movingNode];
+      updateNodeAtPath(targetPath, {
+        ...targetNode,
+        children: updatedChildren,
+      });
       return;
     }
+
+    if (!targetParent || !targetParent.children) return;
 
     let insertIndex = targetIndex;
     if (position === "below") insertIndex = targetIndex + 1;
@@ -226,6 +232,17 @@ export default function LayoutEditor({
       .catch(() => {});
   }, [pageId]);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setReparentMode(false);
+        setNodeToReparentPath(null);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
   const getNodeAtPath = (path: number[]): JSONNode | null => {
     let node: JSONNode = rootNode;
     for (const i of path) {
@@ -236,6 +253,7 @@ export default function LayoutEditor({
   };
 
   const updateNodeAtPath = (path: number[], newNode: JSONNode) => {
+    console.log(path);
     const recursiveUpdate = (node: JSONNode, p: number[]): JSONNode => {
       if (p.length === 0) return newNode;
       const [index, ...rest] = p;
@@ -330,27 +348,6 @@ export default function LayoutEditor({
     const parent = getNodeAtPath(path.slice(0, -1));
     return (
       <div key={path.join("-")} className="ml-4">
-        {/* 🟢 Drop Zone ABOVE */}
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDropTarget({ path, position: "above" });
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (!draggingPath) return;
-            moveNodeToPath(draggingPath, path, "above");
-            setDraggingPath(null);
-            setDropTarget(null);
-          }}
-          className={`h-2 transition-all ${
-            dropTarget &&
-            dropTarget.path.join("-") === path.join("-") &&
-            dropTarget.position === "above"
-              ? "bg-yellow-400"
-              : "bg-transparent"
-          }`}
-        />
         <div
           className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer border-l ${
             selectedNodePath.join("-") === path.join("-")
@@ -359,18 +356,10 @@ export default function LayoutEditor({
               ? "bg-green-100"
               : draggingPath && draggingPath.join("-") === path.join("-")
               ? "bg-yellow-100"
+              : reparentMode && nodeToReparentPath?.join("-") === path.join("-")
+              ? "bg-amber-100"
               : "hover:bg-gray-100"
           }`}
-          draggable // 🟢 allow native drag
-          onDragStart={(e) => {
-            e.stopPropagation();
-            setDraggingPath(path);
-            e.dataTransfer.effectAllowed = "move";
-          }}
-          onDragOver={() => {}}
-          onDrop={() => {}}
-          onDragLeave={() => setDragOverPath(null)}
-          onDragEnd={() => setDraggingPath(null)}
           onClick={() => setSelectedNodePath(path)}
         >
           {node.children && node.children.length > 0 && (
@@ -391,6 +380,41 @@ export default function LayoutEditor({
           {/* Controls */}
           {path.length > 0 && (
             <div className="ml-auto flex gap-1">
+              <button
+                className="text-xs px-1 border rounded text-purple-500 hover:bg-purple-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReparentMode(true);
+                  setNodeToReparentPath(path);
+                }}
+              >
+                Copy
+              </button>
+              <button
+                className="text-xs px-1 border rounded text-blue-500 hover:bg-purple-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (reparentMode && nodeToReparentPath) {
+                    // Prevent reparenting into itself or a descendant
+                    if (
+                      path.join("-").startsWith(nodeToReparentPath.join("-"))
+                    ) {
+                      alert("Cannot reparent into itself or a child");
+                      return;
+                    }
+
+                    // Move node
+                    moveNodeToPath(nodeToReparentPath, path, "inside");
+
+                    // Clear reparent mode
+                    setReparentMode(false);
+                    setNodeToReparentPath(null);
+                  }
+                }}
+              >
+                Paste
+              </button>
+
               <button
                 className="text-xs px-1 border rounded hover:bg-gray-200"
                 onClick={(e) => {
@@ -421,27 +445,6 @@ export default function LayoutEditor({
             </div>
           )}
         </div>
-        {/* 🟢 Drop Zone BELOW */}
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDropTarget({ path, position: "below" });
-          }}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (!draggingPath) return;
-            moveNodeToPath(draggingPath, path, "below");
-            setDraggingPath(null);
-            setDropTarget(null);
-          }}
-          className={`h-2 transition-all ${
-            dropTarget &&
-            dropTarget.path.join("-") === path.join("-") &&
-            dropTarget.position === "below"
-              ? "bg-blue-400"
-              : "bg-transparent"
-          }`}
-        />
         {!isCollapsed &&
           node.children?.map((child, i) =>
             renderTree(child as JSONNode, [...path, i])
@@ -497,6 +500,20 @@ export default function LayoutEditor({
           >
             <option value={undefined}>None</option>
             {Object.entries(LayoutPresets).map(([key, value]) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
+        ) : propName === "transition" ? (
+          <select
+            value={(value as string) || ""}
+            onChange={(e) => {
+              updateProp(propName, e.target.value ? e.target.value : null);
+            }}
+          >
+            <option value={undefined}>None</option>
+            {Object.entries(TransitionPresets).map(([key, value]) => (
               <option key={key} value={key}>
                 {key}
               </option>

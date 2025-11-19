@@ -13,6 +13,7 @@ import Link from "next/link";
 import { JSONNode } from "@/renderer/JsonRenderer";
 import { useThemeMode } from "@/lib/DynamicStyles";
 import { LayoutPresets, LayoutType } from "@/utils/layoutPresets";
+import { TransitionName, TransitionPresets } from "@/theme/transition";
 
 export interface CustomChildrenProps extends CommonProps {
   children?: React.ReactNode;
@@ -148,23 +149,46 @@ export const Footer = createStyledComponent<CustomChildrenProps>(
 export interface LayoutProps extends CustomChildrenProps {
   layout?: LayoutType;
   gap?: string;
+  transition?: TransitionName;
 }
 
 export const Section = createStyledComponent<LayoutProps>(
-  ({ children, layout, ...props }: LayoutProps) => (
-    <section {...props} style={layout ? LayoutPresets[layout] : {}}>
-      {children}
-    </section>
-  ),
+  ({ children, layout, transition, ...props }: LayoutProps) => {
+    const preset = layout ? LayoutPresets[layout] : {};
+    const transitionPreset = transition ? TransitionPresets[transition] : null;
+    return (
+      <section
+        {...props}
+        style={{
+          ...(transitionPreset?.initial || {}),
+          ...(preset || {}),
+        }}
+        data-transition={transition}
+      >
+        {children}
+      </section>
+    );
+  },
   "Section"
 );
 
 export const Layout = createStyledComponent<LayoutProps>(
-  ({ children, layout, ...props }: LayoutProps) => (
-    <div {...props} style={layout ? LayoutPresets[layout] : {}}>
-      {children}
-    </div>
-  ),
+  ({ children, layout, transition, ...props }: LayoutProps) => {
+    const preset = layout ? LayoutPresets[layout] : {};
+    const transitionPreset = transition ? TransitionPresets[transition] : null;
+    return (
+      <div
+        {...props}
+        style={{
+          ...(transitionPreset?.initial || {}),
+          ...(preset || {}),
+        }}
+        data-transition={transition}
+      >
+        {children}
+      </div>
+    );
+  },
   "Layout"
 );
 
