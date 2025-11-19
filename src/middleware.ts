@@ -34,11 +34,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const setupCheckRes = await fetch(`${req.nextUrl.origin}/api/check-setup`);
+  const setupCheckRes = await fetch(`${req.nextUrl.origin}/api/check-setup`, {
+    headers: { "x-middleware-request": "true" },
+  });
   if (setupCheckRes.ok) {
     const setupData = await setupCheckRes.json();
     if (!setupData.adminExists && url.pathname !== "/setup") {
-      fetch(`${req.nextUrl.origin}/api/auth/logout`, { method: "POST" });
+      fetch(`${req.nextUrl.origin}/api/auth/logout`, {
+        headers: { "x-middleware-request": "true" },
+        method: "POST",
+      });
       return NextResponse.redirect(new URL("/setup", req.url));
     }
   }
