@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  skipMiddlewareUrlNormalize: true,
+  skipTrailingSlashRedirect: true,
   // output: "standalone",
 };
 
