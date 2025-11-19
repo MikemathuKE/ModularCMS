@@ -3,7 +3,7 @@ import { Schema, Document, model, models, Connection } from "mongoose";
 export interface UserDocument extends Document {
   email: string;
   password: string;
-  role: "admin" | "editor" | "viewer";
+  role: "admin" | "editor" | "superuser";
   createdAt: Date;
 }
 
@@ -13,8 +13,8 @@ export const UserSchema = new Schema<UserDocument>(
     password: { type: String, required: true }, // hashed
     role: {
       type: String,
-      enum: ["admin", "editor", "viewer"],
-      default: "viewer",
+      enum: ["admin", "editor", "superuser"],
+      default: "editor",
     },
   },
   { timestamps: true }

@@ -7,6 +7,11 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Account management state
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+
   useEffect(() => {
     fetch("/api/cms/settings")
       .then((res) => res.json())
@@ -16,7 +21,7 @@ export default function SettingsPage() {
       });
   }, []);
 
-  const save = async () => {
+  const saveSettings = async () => {
     await fetch("/api/cms/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -24,9 +29,6 @@ export default function SettingsPage() {
     });
     alert("Settings saved!");
   };
-
-  if (loading) return <p>Loading...</p>;
-  if (!settings) return <p>No settings found</p>;
 
   const updateSocialLink = (idx: number, field: string, value: string) => {
     const links = [...settings.socialLinks];
@@ -47,11 +49,43 @@ export default function SettingsPage() {
     setSettings({ ...settings, socialLinks: links });
   };
 
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword) {
+      setPasswordMessage("⚠️ Both fields are required");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/cms/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldPassword,
+          newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPasswordMessage("✅ Password updated successfully");
+        setOldPassword("");
+        setNewPassword("");
+      } else {
+        setPasswordMessage(`⚠️ ${data.error || "Error changing password"}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setPasswordMessage("⚠️ Something went wrong");
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (!settings) return <p>No settings found</p>;
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Settings</h1>
 
-      {/* Site Title */}
+      {/* Site Settings */}
       <div>
         <label className="block mb-2 font-medium">Site Title</label>
         <input
@@ -64,7 +98,6 @@ export default function SettingsPage() {
         />
       </div>
 
-      {/* Site Description */}
       <div>
         <label className="block mb-2 font-medium">Site Description</label>
         <input
@@ -135,11 +168,53 @@ export default function SettingsPage() {
 
       <button
         type="button"
-        onClick={save}
+        onClick={saveSettings}
         className="mt-6 px-4 py-2 bg-green-600 text-white rounded"
       >
         Save Settings
       </button>
+
+      {/* Account Management */}
+      <div className="mt-8 border-t pt-6">
+        <h2 className="text-xl font-semibold mb-4">Account Management</h2>
+        <div className="space-y-2 max-w-md">
+          <label className="block font-medium">Current Password</label>
+          <input
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
+
+          <label className="block font-medium">New Password</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
+
+          <button
+            type="button"
+            onClick={handleChangePassword}
+            className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          >
+            Change Password
+          </button>
+
+          {passwordMessage && (
+            <p
+              className={`mt-2 text-sm ${
+                passwordMessage.startsWith("✅")
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {passwordMessage}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

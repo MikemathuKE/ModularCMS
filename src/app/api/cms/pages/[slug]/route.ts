@@ -37,9 +37,11 @@ export async function GET(
 }
 
 // UPDATE page (status + json)
-export async function PUT(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const slug = searchParams.get("slug");
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
 
   await dbConnect();
 
@@ -80,9 +82,11 @@ export async function PUT(req: NextRequest) {
 }
 
 // DELETE page by slug
-export async function DELETE(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const slug = searchParams.get("slug");
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
 
   await dbConnect();
 

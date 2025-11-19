@@ -8,5 +8,17 @@ export async function POST() {
     path: "/",
     expires: new Date(0),
   });
+  res.cookies.set("email", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: new Date(0),
+  });
+  res.cookies.set("role", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    expires: new Date(0),
+  });
   return res;
 }

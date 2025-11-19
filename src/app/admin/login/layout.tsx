@@ -11,12 +11,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <div className="h-dvh z-100 wh-full flex bg-slate-800 overflow-hidden">
-          {children}
-        </div>
-      </body>
-    </html>
+    <div className="h-dvh z-100 wh-full flex bg-slate-800 overflow-hidden">
+      {children}
+    </div>
   );
 }

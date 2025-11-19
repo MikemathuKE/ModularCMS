@@ -8,6 +8,12 @@ WORKDIR /app
 
 COPY . /app
 
+RUN npm install
+RUN npm run build
+
+COPY public ./next/public
+
+
 ENV NODE_ENV=production
 ENV PORT=$PORT
 

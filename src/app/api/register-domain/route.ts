@@ -10,6 +10,7 @@ import { getOrCreatePageModel } from "@/models/Page";
 import { getOrCreateUserModel } from "@/models/User";
 
 export async function POST(req: Request) {
+  const main_slug = process.env.DEFAULT_TENANT || "main";
   try {
     const { slug, domain, adminEmail, adminPassword } = await req.json();
 
@@ -32,7 +33,13 @@ export async function POST(req: Request) {
 
     // Create tenant metadata
     const dbName = slug.replace(/\./g, "_");
-    const tenant = await Tenant.create({ slug, domain, dbName });
+    console.log(domain);
+    const tenant = await Tenant.create({
+      slug,
+      domain,
+      dbName,
+      customDomain: domain,
+    });
 
     // Connect to tenant DB
     const tenantConn = await getTenantConnection(slug);
@@ -48,7 +55,7 @@ export async function POST(req: Request) {
     await User.create({
       email: adminEmail,
       password: hashedPassword,
-      role: "admin",
+      role: slug == main_slug ? "superuser" : "admin",
     });
 
     // Initialize defaults

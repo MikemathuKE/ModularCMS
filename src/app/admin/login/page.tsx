@@ -77,7 +77,7 @@ export default function AuthPage() {
           {loading ? "Please wait..." : mode === "login" ? "Login" : "Register"}
         </button>
 
-        <div className="mt-4 text-center text-sm">
+        {/* <div className="mt-4 text-center text-sm">
           {mode === "login" ? (
             <>
               Don’t have an account?{" "}
@@ -101,7 +101,7 @@ export default function AuthPage() {
               </button>
             </>
           )}
-        </div>
+        </div> */}
       </form>
     </div>
   );

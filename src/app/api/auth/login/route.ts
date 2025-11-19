@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { getTenantConnection } from "@/lib/mongodb";
-import { UserSchema } from "@/models/User";
+import { getOrCreateUserModel, UserSchema } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Tenant missing" }, { status: 400 });
 
   const tenantConn = await getTenantConnection(tenantSlug);
-  const User = tenantConn.model("User", UserSchema);
+  const User = getOrCreateUserModel(tenantConn);
 
   const user = await User.findOne({ email });
   if (!user) {
@@ -40,6 +40,22 @@ export async function POST(req: Request) {
 
   const res = NextResponse.json({ message: "Login successful" });
   res.cookies.set("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  // Email cookie
+  res.cookies.set("email", user.email, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  // Role cookie
+  res.cookies.set("role", user.role, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",

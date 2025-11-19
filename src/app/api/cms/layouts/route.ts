@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
 import { getTenantConnection } from "@/lib/mongodb";
 import { getOrCreateLayoutModel } from "@/models/Layout";
 import { LayoutDocument } from "@/models/Layout";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)

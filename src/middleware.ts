@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { pageMappings } from "./utils/pageMappings";
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/|images/|audios/|files/|videos/).*)",
+  ],
 };
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
@@ -31,6 +34,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const setupCheckRes = await fetch(`${req.nextUrl.origin}/api/check-setup`);
+  if (setupCheckRes.ok) {
+    const setupData = await setupCheckRes.json();
+    if (!setupData.adminExists && url.pathname !== "/setup") {
+      fetch(`${req.nextUrl.origin}/api/auth/logout`, { method: "POST" });
+      return NextResponse.redirect(new URL("/setup", req.url));
+    }
+  }
+
   const token = req.cookies.get("token")?.value;
   const isAdminRoute = url.pathname.startsWith("/admin");
   const isLoginRoute = url.pathname === "/admin/login";
@@ -46,6 +58,19 @@ export async function middleware(req: NextRequest) {
     const valid = await verifyJWT(token);
     if (!valid) {
       return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
+  }
+
+  const role = req.cookies.get("role")?.value;
+  // Check if User is unauthorized to access a certain page\
+  console.log(role);
+  if (role) {
+    for (const mapping of pageMappings) {
+      const { name, path, roles } = mapping;
+      if (url.pathname == path && !roles.includes(role)) {
+        console.log(name, path, role);
+        return NextResponse.redirect(new URL("/admin", req.url));
+      }
     }
   }
 

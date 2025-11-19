@@ -1,25 +1,29 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const navItems = [
-  { name: "Dashboard", path: "/admin" },
-  { name: "Layout", path: "/admin/layout" },
-  { name: "Pages", path: "/admin/pages" },
-  { name: "Media", path: "/admin/media" },
-  { name: "Content", path: "/admin/content" },
-  { name: "Content Types", path: "/admin/contenttypes" },
-  { name: "Theme", path: "/admin/themes" },
-  { name: "Settings", path: "/admin/settings" },
-];
+import { pageMappings } from "@/utils/pageMappings";
 
 export const Sidebar: React.FC = () => {
   const router = useRouter();
+  const [user, SetUser] = useState<{ email: string; role: string }>({
+    email: "",
+    role: "editor",
+  });
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((result) => {
+        console.log(result);
+        if (result.user) SetUser(result.user);
+      });
+  }, []);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    router.push("/admin/login");
   };
 
   return (
@@ -27,17 +31,22 @@ export const Sidebar: React.FC = () => {
       <div className="p-4 font-bold text-xl border-b">CMS Admin</div>
       <nav className="p-4">
         <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <Link href={item.path}>
-                <span
-                  className={`block px-3 py-2 rounded-md cursor-pointer
+          {pageMappings.map((item, index) => (
+            <>
+              {item.roles.includes(user.role) && (
+                <li key={index}>
+                  <Link href={item.path} key={item.name}>
+                    <span
+                      className={`block px-3 py-2 rounded-md cursor-pointer
                       hover:bg-gray-100`}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            </li>
+                      key={item.path}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                </li>
+              )}
+            </>
           ))}
         </ul>
         <div className="mt-auto bottom-0 pt-4 border-t border-gray-700">
