@@ -11,6 +11,7 @@ export const config = {
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const secretKey = new TextEncoder().encode(JWT_SECRET);
+const CURR_URL = process.env.MAIN_URL || "http://localhost:3000";
 
 async function verifyJWT(token?: string) {
   if (!token) return null;
@@ -34,13 +35,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const setupCheckRes = await fetch(`${req.nextUrl.origin}/api/check-setup`, {
+  const setupCheckRes = await fetch(`${CURR_URL}/api/check-setup`, {
     headers: { "x-middleware-request": "true" },
   });
   if (setupCheckRes.ok) {
     const setupData = await setupCheckRes.json();
     if (!setupData.adminExists && url.pathname !== "/setup") {
-      fetch(`${req.nextUrl.origin}/api/auth/logout`, {
+      fetch(`${CURR_URL}/api/auth/logout`, {
         headers: { "x-middleware-request": "true" },
         method: "POST",
       });
@@ -91,7 +92,7 @@ export async function middleware(req: NextRequest) {
   try {
     // IMPORTANT: absolute URL (Edge runtime doesn’t know localhost implicitly)
     const res = await fetch(
-      `${req.nextUrl.origin}/api/tenant/lookup?subdomain=${subdomain}`,
+      `${CURR_URL}/api/tenant/lookup?subdomain=${subdomain}`,
       {
         headers: { "x-internal-request": "middleware" },
       }
