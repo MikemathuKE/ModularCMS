@@ -16,7 +16,6 @@ export const Sidebar: React.FC = () => {
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((result) => {
-        console.log(result);
         if (result.user) SetUser(result.user);
       });
   }, []);

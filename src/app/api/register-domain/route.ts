@@ -33,7 +33,6 @@ export async function POST(req: Request) {
 
     // Create tenant metadata
     const dbName = slug.replace(/\./g, "_");
-    console.log(domain);
     const tenant = await Tenant.create({
       slug,
       domain,

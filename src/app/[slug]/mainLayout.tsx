@@ -10,7 +10,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     async function getActiveTheme() {
       const themeRes = await fetch("/api/cms/themes/active");
       const theme = await themeRes.json();
-      console.log(theme);
       if (theme) SetThemeId(theme._id);
     }
     getActiveTheme();

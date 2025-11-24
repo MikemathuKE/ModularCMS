@@ -12,12 +12,10 @@ export async function seedAdmin() {
 
   const existing = await User.findOne({ email });
   if (existing) {
-    console.log("⏭️ Admin already exists");
     process.exit(0);
   }
 
   await User.create({ email, password: hash, role: "admin" });
-  console.log(`✅ Default admin created: ${email} / ${password}`);
   process.exit(0);
 }
 

@@ -24,7 +24,6 @@ export const ModalManager = {
     modals.get(id)?.close();
   },
   get() {
-    console.log(modals);
     return modals;
   },
 };

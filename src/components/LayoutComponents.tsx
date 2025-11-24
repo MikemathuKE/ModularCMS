@@ -152,21 +152,73 @@ export interface LayoutProps extends CustomChildrenProps {
   transition?: TransitionName;
 }
 
+export function TransitionWrapper({
+  transition,
+  children,
+}: {
+  transition?: TransitionName;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !transition) return;
+
+    const preset = TransitionPresets[transition];
+    if (!preset) return;
+
+    // 1. Apply initial state BEFORE animation
+    if (preset.initial) {
+      Object.assign(el.style, preset.initial);
+    }
+
+    // 2. Apply transition after hydration
+    requestAnimationFrame(() => {
+      Object.assign(el.style, preset.style);
+    });
+  }, [transition]);
+
+  return (
+    <div ref={ref} data-transition={transition}>
+      {children}
+    </div>
+  );
+}
+
 export const Section = createStyledComponent<LayoutProps>(
   ({ children, layout, transition, ...props }: LayoutProps) => {
     const preset = layout ? LayoutPresets[layout] : {};
     const transitionPreset = transition ? TransitionPresets[transition] : null;
+
     return (
-      <section
-        {...props}
-        style={{
-          ...(transitionPreset?.initial || {}),
-          ...(preset || {}),
-        }}
-        data-transition={transition}
-      >
-        {children}
-      </section>
+      <>
+        {transitionPreset !== null && (
+          <TransitionWrapper transition={transition}>
+            <section
+              {...props}
+              style={{
+                ...(transitionPreset?.initial || {}),
+                ...(preset || {}),
+              }}
+              data-transition={transition}
+            >
+              {children}
+            </section>
+          </TransitionWrapper>
+        )}
+        {transition === null && (
+          <section
+            {...props}
+            style={{
+              ...(preset || {}),
+            }}
+            data-transition={transition}
+          >
+            {children}
+          </section>
+        )}
+      </>
     );
   },
   "Section"

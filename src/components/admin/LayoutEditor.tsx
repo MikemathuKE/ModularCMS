@@ -253,7 +253,6 @@ export default function LayoutEditor({
   };
 
   const updateNodeAtPath = (path: number[], newNode: JSONNode) => {
-    console.log(path);
     const recursiveUpdate = (node: JSONNode, p: number[]): JSONNode => {
       if (p.length === 0) return newNode;
       const [index, ...rest] = p;

@@ -79,9 +79,6 @@ export async function PUT(req: NextRequest) {
   const email = req.cookies.get("email")?.value;
 
   if (!email || !oldPassword || !newPassword) {
-    console.log(email);
-    console.log(oldPassword);
-    console.log(newPassword);
     return NextResponse.json(
       { error: "Email, old password, and new password are required" },
       { status: 400 }

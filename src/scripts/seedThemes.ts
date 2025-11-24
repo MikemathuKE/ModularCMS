@@ -20,18 +20,14 @@ async function seedThemes() {
 
     if (existing) {
       if (JSON.stringify(existing.data) === JSON.stringify(json)) {
-        console.log(`⏭️ Skipped theme: ${name} (no changes)`);
         continue;
       }
       await Theme.updateOne({ name }, { data: json });
-      console.log(`🔄 Updated theme: ${name}`);
     } else {
       await Theme.create({ name, data: json });
-      console.log(`✅ Created new theme: ${name}`);
     }
   }
 
-  console.log("🎉 Theme seeding finished!");
   process.exit(0);
 }
 

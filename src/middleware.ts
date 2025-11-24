@@ -69,12 +69,10 @@ export async function middleware(req: NextRequest) {
 
   const role = req.cookies.get("role")?.value;
   // Check if User is unauthorized to access a certain page\
-  console.log(role);
   if (role) {
     for (const mapping of pageMappings) {
       const { name, path, roles } = mapping;
       if (url.pathname == path && !roles.includes(role)) {
-        console.log(name, path, role);
         return NextResponse.redirect(new URL("/admin", req.url));
       }
     }
