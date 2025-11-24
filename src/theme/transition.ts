@@ -353,15 +353,6 @@ export const TransitionPresets = {
       transition: "transform 0.25s ease, opacity 0.25s ease",
     },
   },
-  zoomOut: {
-    label: "Zoom Out",
-    initial: {},
-    style: {
-      transform: "scale(0.8)",
-      opacity: 0,
-      transition: "transform 0.35s ease, opacity 0.35s ease",
-    },
-  },
   zoomOutFar: {
     label: "Zoom Out Far",
     initial: {},
