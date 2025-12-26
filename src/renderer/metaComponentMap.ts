@@ -30,6 +30,7 @@ import {
   TableRow,
   TableData,
   Table,
+  Layout,
 } from "@/components/LayoutComponents";
 
 import {
@@ -150,7 +151,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-
       isOpen: true,
       position: "left",
       title: null,
@@ -162,7 +162,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-
       title: null,
       textColor: null,
     },
@@ -172,7 +171,6 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     props: {
       id: null,
       style: null,
-
       showSideBar: false,
       toggleSideBar: null, // Should be set in editor
     },
@@ -187,7 +185,7 @@ export const MetaComponentMap: Record<string, ComponentMeta<any>> = {
     },
   },
   Layout: {
-    component: Section,
+    component: Layout,
     props: {
       id: null,
       style: null,

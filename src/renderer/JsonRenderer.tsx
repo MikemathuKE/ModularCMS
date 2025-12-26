@@ -23,7 +23,9 @@ function getKey() {
 
 export function renderJSONNode(
   node: JSONNode,
-  options: RendererOptions = {}
+  options: RendererOptions = {},
+  highlight: boolean = false,
+  highlight_id: string = ""
 ): React.ReactElement {
   const { handlers = {}, allowUnsafeEval = false } = options;
   const { component, props = {}, children } = node;
@@ -35,7 +37,12 @@ export function renderJSONNode(
         {Array.isArray(children)
           ? children.map((child) =>
               typeof child === "object"
-                ? renderJSONNode(child as JSONNode, options)
+                ? renderJSONNode(
+                    child as JSONNode,
+                    options,
+                    highlight,
+                    highlight_id
+                  )
                 : child
             )
           : null}
@@ -62,10 +69,20 @@ export function renderJSONNode(
     }
   }
 
+  if (highlight && highlight_id != "" && mergedProps.id == highlight_id) {
+    if (mergedProps.style) {
+      mergedProps.style.border = "4px solid #FFBF00";
+    } else {
+      mergedProps.style = {
+        border: "4px solid #FFBF00",
+      };
+    }
+  }
+
   const renderedChildren = Array.isArray(children)
     ? children.map((child) =>
         typeof child === "object"
-          ? renderJSONNode(child as JSONNode, options)
+          ? renderJSONNode(child as JSONNode, options, highlight, highlight_id)
           : child
       )
     : undefined;

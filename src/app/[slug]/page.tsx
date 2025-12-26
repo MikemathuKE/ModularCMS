@@ -44,10 +44,10 @@ export default function PublicPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
-        {renderJSONNode(pageData)}
-      </div>
-    </main>
+    // <main className="min-h-screen bg-gray-50 p-6">
+    //   <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
+    <>{renderJSONNode(pageData)}</>
+    //   </div>
+    // </main>
   );
 }

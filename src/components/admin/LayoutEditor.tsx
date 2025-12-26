@@ -16,6 +16,7 @@ import MediaSelector from "@/components/admin/MediaSelector";
 import { ModalManager } from "@/lib/ModalManager";
 import { LayoutPresets } from "@/utils/layoutPresets";
 import { TransitionPresets } from "@/theme/transition";
+import { Info, Main, PageContainer } from "../LayoutComponents";
 
 interface ComponentCategory {
   name: string;
@@ -111,6 +112,7 @@ export default function LayoutEditor({
   pageId: string;
 }) {
   const [selectedNodePath, setSelectedNodePath] = useState<number[]>([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>("");
   const [collapsedNodes, setCollapsedNodes] = useState<CollapsedState>({});
   const [contentTypes, setContentTypes] = useState<
     { name: string; id: string; slug: string }[]
@@ -119,6 +121,7 @@ export default function LayoutEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [status, setPublished] = useState("draft");
   const [pageName, setPageName] = useState<string>("");
+  const [addComponent, SetAddComponent] = useState<boolean>(false);
 
   const [layouts, setLayouts] = useState<string[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("default");
@@ -142,7 +145,7 @@ export default function LayoutEditor({
   } | null>(null);
 
   // 🟢 NEW: Move node between sibling positions or into a parent
-  const moveNodeToPath = (
+  const copyNodeToPath = (
     sourcePath: number[],
     targetPath: number[],
     position: "above" | "below" | "inside" = "below"
@@ -177,7 +180,20 @@ export default function LayoutEditor({
     if (position === "inside") {
       const targetNode = getNodeAtPath(targetPath);
       if (!targetNode) return;
-      const updatedChildren = [...(targetNode.children || []), movingNode];
+      const recursiveIdUpdate = (node: JSONNode): JSONNode => {
+        if ("props" in node) node.props = { ...node.props, id: uuidv4() };
+        const children = node.children?.map(
+          (child: string | number | JSONNode | null) =>
+            recursiveIdUpdate(child as JSONNode)
+        );
+        return { ...node, children };
+      };
+      const newNode = recursiveIdUpdate(
+        structuredClone(movingNode as JSONNode)
+      );
+      const updatedChildren = [...(targetNode.children || []), newNode];
+      console.log(newNode);
+
       updateNodeAtPath(targetPath, {
         ...targetNode,
         children: updatedChildren,
@@ -258,7 +274,9 @@ export default function LayoutEditor({
       const [index, ...rest] = p;
       const children = node.children?.map(
         (child: string | number | JSONNode | null, i: number) =>
-          i === index ? recursiveUpdate(child as JSONNode, rest) : child
+          i === index
+            ? recursiveUpdate({ ...(child as JSONNode) }, rest)
+            : child
       );
       return { ...node, children };
     };
@@ -268,11 +286,16 @@ export default function LayoutEditor({
   const addChildNode = (component: string) => {
     const meta = MetaComponentMap[component];
     if (!meta) return;
+
+    const newProps = { ...meta.props };
+    newProps.id = uuidv4();
     const newChild: JSONNode = {
       component,
-      props: { ...meta.props },
+      props: newProps,
       children: [],
     };
+    console.log(meta.props);
+    console.log(newChild);
     const node = getNodeAtPath(selectedNodePath);
     if (!node) return;
     const children = [...(node.children || []), newChild];
@@ -288,6 +311,7 @@ export default function LayoutEditor({
     const children = parent.children.filter((_, i) => i !== index);
     updateNodeAtPath(parentPath, { ...parent, children });
     setSelectedNodePath([]);
+    setSelectedNodeId("");
   };
 
   const moveNode = (path: number[], direction: "up" | "down") => {
@@ -312,6 +336,7 @@ export default function LayoutEditor({
 
     updateNodeAtPath(parentPath, { ...parent, children: newChildren });
     setSelectedNodePath([...parentPath, swapIndex]);
+    setSelectedNodeId("");
   };
 
   const updatePropDebounce = useCallback(
@@ -346,9 +371,12 @@ export default function LayoutEditor({
     const isCollapsed = collapsedNodes[path.join("-")];
     const parent = getNodeAtPath(path.slice(0, -1));
     return (
-      <div key={path.join("-")} className="ml-4">
+      <div
+        key={path.join("-")}
+        className="ml-4 overflow-hidden border-l border-gray-300"
+      >
         <div
-          className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer border-l ${
+          className={`flex items-center text-sm gap-2 px-2 py-1 rounded cursor-pointer  ${
             selectedNodePath.join("-") === path.join("-")
               ? "bg-blue-100"
               : dragOverPath && dragOverPath.join("-") === path.join("-")
@@ -359,7 +387,10 @@ export default function LayoutEditor({
               ? "bg-amber-100"
               : "hover:bg-gray-100"
           }`}
-          onClick={() => setSelectedNodePath(path)}
+          onClick={() => {
+            setSelectedNodePath(path);
+            setSelectedNodeId(node.props?.id || "");
+          }}
         >
           {node.children && node.children.length > 0 && (
             <button
@@ -374,7 +405,9 @@ export default function LayoutEditor({
           )}
           <span className="font-mono">
             {node.component || "<Root>"}{" "}
-            {node.props?.id ? "(" + node.props?.id + ")" : ""}
+            <span className="text-red-400">
+              {node.props?.id ? "(" + node.props?.id.slice(0, 8) + ")" : ""}
+            </span>
           </span>
           {/* Controls */}
           {path.length > 0 && (
@@ -403,7 +436,7 @@ export default function LayoutEditor({
                     }
 
                     // Move node
-                    moveNodeToPath(nodeToReparentPath, path, "inside");
+                    copyNodeToPath(nodeToReparentPath, path, "inside");
 
                     // Clear reparent mode
                     setReparentMode(false);
@@ -603,7 +636,7 @@ export default function LayoutEditor({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b bg-white">
         <h1 className="font-semibold text-xl">
@@ -648,38 +681,92 @@ export default function LayoutEditor({
         <div className="px-4 py-2 text-sm text-gray-700">{saveMessage}</div>
       )}
 
-      <div className="flex flex-1">
+      <div className="flex flex-row flex-1 justify-center border-b overflow-hidden">
         {/* Palette */}
-        <div className="w-1/4 bg-gray-100 p-2 overflow-auto border-r">
-          {componentCategories.map((cat) => (
-            <div key={cat.name} className="mb-3">
-              <h3 className="font-semibold">{cat.name}</h3>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {cat.components.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => addChildNode(c)}
-                    className="bg-blue-200 text-sm px-2 py-1 rounded hover:bg-blue-300"
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+        <div className="w-5/12 min-w-100 bg-gray-100 border-r flex flex-col overflow-hidden">
+          <div className="flex flex-col flex-1 bg-white p-2 border-r overflow-hidden">
+            <div className="flex bg-gray-100 pl-4 pr-4 justify-between items-center text-center">
+              <h2 className="font-semibold text-lg">Page Structure</h2>
+              <button
+                className="text-green-500 border-0 bg-gray-200 m-1 p-1 pl-3 pr-3 rounded-2xl"
+                onClick={() => {
+                  SetAddComponent(true);
+                }}
+              >
+                + Add Component
+              </button>
             </div>
-          ))}
+            {/* Tree */}
+            <div className="flex-1 w-full overflow-y-auto overflow-x-auto">
+              {renderTree(rootNode, [])}
+            </div>
+          </div>
         </div>
 
-        {/* Tree */}
-        <div className="flex-1 bg-white p-2 overflow-auto border-r">
-          <h2 className="font-semibold text-lg mb-2">Page Structure</h2>
-          {renderTree(rootNode, [])}
+        {/* Preview */}
+        <div className="bg-gray-200 p-2 w-full flex flex-col overflow-hidden">
+          {addComponent && (
+            <div className="bg-gray-100 border-2 rounded-2xl border-gray-300 shadow p-4 text-center max-w-80 fixed">
+              <h1 className="font-bold text-2xl text-center text-red-900">
+                Add Component
+              </h1>
+              {componentCategories.map((cat) => (
+                <div key={cat.name} className="mb-3">
+                  <h3 className="font-semibold">{cat.name}</h3>
+                  <div className="flex flex-wrap gap-1 mt-1 justify-center">
+                    {cat.components.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => {
+                          addChildNode(c);
+                          SetAddComponent(false);
+                        }}
+                        className="bg-blue-200 text-sm px-2 py-1 rounded hover:bg-blue-300"
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div
+            className="flex-1 fixed bg-amber-300"
+            onClick={() => {
+              SetAddComponent(false);
+            }}
+          ></div>
+
+          <h2 className="font-semibold text-lg mb-2">Live Preview</h2>
+          <div
+            className="bg-white p-2 border rounded overflow-auto"
+            onClick={() => {
+              SetAddComponent(false);
+            }}
+          >
+            <ThemeProvider themeIdentifier={null}>
+              <PageContainer>
+                <Main>
+                  <Info>
+                    {renderJSONNode(
+                      structuredClone(rootNode),
+                      undefined,
+                      true,
+                      selectedNodeId
+                    )}
+                  </Info>
+                </Main>
+              </PageContainer>
+            </ThemeProvider>
+          </div>
         </div>
 
         {/* Props editor */}
-        <div className="w-1/4 bg-gray-100 p-2 overflow-auto">
+        <div className="w-3/8 bg-gray-50 p-2 border-l z-10 overflow-hidden">
           <h2 className="font-semibold text-lg mb-2">Props Editor</h2>
           {selectedNode ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 w-full h-full overflow-y-auto">
               {Object.entries(
                 MetaComponentMap[selectedNode.component]?.props || {}
               ).map(([name, def]) =>
@@ -710,16 +797,6 @@ export default function LayoutEditor({
           ) : (
             <p>Select a node</p>
           )}
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div className="bg-gray-200 p-2">
-        <h2 className="font-semibold text-lg mb-2">Live Preview</h2>
-        <div className="bg-white p-2 border rounded">
-          <ThemeProvider themeIdentifier={null}>
-            {renderJSONNode(rootNode)}
-          </ThemeProvider>
         </div>
       </div>
     </div>

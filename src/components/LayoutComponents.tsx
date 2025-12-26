@@ -191,9 +191,8 @@ export const Section = createStyledComponent<LayoutProps>(
     const preset = layout ? LayoutPresets[layout] : {};
     const transitionPreset = transition ? TransitionPresets[transition] : null;
 
-    return (
-      <>
-        {transitionPreset !== null && (
+    {
+      /* {transitionPreset !== null && (
           <TransitionWrapper transition={transition}>
             <section
               {...props}
@@ -217,9 +216,10 @@ export const Section = createStyledComponent<LayoutProps>(
           >
             {children}
           </section>
-        )}
-      </>
-    );
+        )} */
+    }
+
+    return <section {...props}>{children}</section>;
   },
   "Section"
 );

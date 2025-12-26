@@ -648,7 +648,7 @@ export const defaultTheme: AppTheme = {
       overflowY: "auto",
     },
     Info: {
-      padding: "2rem",
+      padding: "2rem 8rem 2rem 8rem",
       backgroundColor: "{{backgroundColor}}",
       width: "100%",
       overflowX: "hidden",
