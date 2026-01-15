@@ -53,7 +53,12 @@ export const Sidebar: React.FC = () => {
                       key={item.name}
                       className="flex align-middle hover:bg-gray-100 cursor-pointer py-1 justify-center"
                     >
-                      {IconComp && <IconComp className="h-6 w-6" />}
+                      {IconComp && (
+                        <IconComp
+                          className="h-6 w-6"
+                          key={`icon_${item.name}`}
+                        />
+                      )}
                       {fullSidebar && (
                         <span
                           className={`block px-3 rounded-md w-48`}

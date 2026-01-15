@@ -1,19 +1,39 @@
 import { Schema, model, models, Types, Connection } from "mongoose";
 
-export interface ContentTypeField {
-  name: string; // "title", "body", "image"
-  type:
-    | "string"
-    | "number"
-    | "boolean"
-    | "date"
-    | "json"
-    | "image"
-    | "video"
-    | "audio";
+export type PrimitiveFieldType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "image"
+  | "video"
+  | "audio";
+
+export interface ContentTypeFieldBase {
+  name: string; // field key
+  label?: string; // UI label
   required?: boolean;
-  // (Optional) validation bits you may add later
 }
+
+/** Primitive leaf field */
+export interface PrimitiveField extends ContentTypeFieldBase {
+  kind: "primitive";
+  type: PrimitiveFieldType;
+}
+
+/** Nested object */
+export interface ObjectField extends ContentTypeFieldBase {
+  kind: "object";
+  fields: ContentTypeField[]; // recursive
+}
+
+/** List / array */
+export interface ListField extends ContentTypeFieldBase {
+  kind: "list";
+  of: ContentTypeField; // schema of items
+}
+
+export type ContentTypeField = PrimitiveField | ObjectField | ListField;
 
 /**
  * Content Types define a schema (field model) and meta.
@@ -32,26 +52,11 @@ export const ContentTypeSchema = new Schema<ContentTypeDoc>(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
-    fields: [
-      {
-        name: { type: String, required: true },
-        type: {
-          type: String,
-          enum: [
-            "string",
-            "number",
-            "boolean",
-            "date",
-            "json",
-            "image",
-            "video",
-            "audio",
-          ],
-          required: true,
-        },
-        required: { type: Boolean, default: false },
-      },
-    ],
+    fields: {
+      type: [Schema.Types.Mixed],
+      required: true,
+      default: [],
+    },
   },
   { timestamps: true }
 );

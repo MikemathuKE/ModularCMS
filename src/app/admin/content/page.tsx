@@ -83,7 +83,7 @@ export default function ContentPage() {
                   <td className="p-3 border-b text-right">
                     <Link
                       href={`/admin/content/${ct.slug}`}
-                      className="px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700"
+                      className="px-3 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
                     >
                       Manage
                     </Link>

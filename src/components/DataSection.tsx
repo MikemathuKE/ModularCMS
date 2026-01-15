@@ -3,6 +3,7 @@ import React, { useEffect, useState, ReactNode } from "react";
 import { createStyledComponent } from "@/lib/DynamicStyles";
 import { CommonProps } from "@/lib/globals";
 import DataBlock from "@/components/DataBlock";
+// import { executeDataSourceEndpoint } from "@/lib/datasource/executeDataSourceEndpoint";
 
 export interface DataSectionProps extends CommonProps {
   contentType: string;
@@ -11,6 +12,7 @@ export interface DataSectionProps extends CommonProps {
   limit?: number;
   paginate?: boolean; // new: enable/disable pagination (default false)
   children: ReactNode;
+  dataSourceEndpointId?: string; // optional
 }
 
 export const DataSection = createStyledComponent<DataSectionProps>(
@@ -21,6 +23,7 @@ export const DataSection = createStyledComponent<DataSectionProps>(
     limit = 6,
     paginate = false,
     children,
+    dataSourceEndpointId,
   }) => {
     const [data, setData] = useState({
       items: [] as any[],
@@ -33,20 +36,28 @@ export const DataSection = createStyledComponent<DataSectionProps>(
     async function fetchData(page = 1) {
       setLoading(true);
       try {
-        const query: Record<string, any> = {
-          filters,
-          sort,
-          limit,
-          page,
-        };
-        const apiUrl = "/api/cms/content";
-        const res = await fetch(
-          `${apiUrl}/${contentType}?q=${encodeURIComponent(
-            JSON.stringify(query)
-          )}`
-        );
-        const json = await res.json();
-        setData(json || { items: [], page, pages: 0, total: 0 });
+        let itemsData;
+        if (dataSourceEndpointId) {
+          // Use external endpoint
+          // const json = await executeDataSourceEndpoint(dataSourceEndpointId, {
+          //   ...filters,
+          //   page,
+          //   limit,
+          // },undefined );
+          // itemsData = json;
+        } else {
+          // Use CMS contentType
+          if (!contentType)
+            throw new Error("contentType required if no DataSourceEndpoint");
+          const query = { filters, sort, page, limit };
+          const res = await fetch(
+            `/api/cms/content/${contentType}?q=${encodeURIComponent(
+              JSON.stringify(query)
+            )}`
+          );
+          itemsData = await res.json();
+        }
+        setData(itemsData || { items: [], page, pages: 0, total: 0 });
       } catch (err) {
         console.error("DataSection fetch error:", err);
       } finally {

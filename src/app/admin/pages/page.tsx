@@ -76,7 +76,7 @@ export default function PagesPage() {
               </td>
               <td className="border border-gray-300 px-4 py-2 space-x-2">
                 <Link href={`/admin/pages/edit/${page.slug}`}>
-                  <button className="cursor-pointer px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                  <button className="cursor-pointer px-3 py-1 bg-amber-500 text-white font-semibold rounded hover:bg-gray-300">
                     Edit
                   </button>
                 </Link>

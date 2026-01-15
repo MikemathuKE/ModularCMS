@@ -5,7 +5,8 @@ import Link from "next/link";
 
 interface ContentTypeField {
   name: string;
-  type: string;
+  type?: string;
+  kind: string;
   required?: boolean;
 }
 
@@ -112,8 +113,12 @@ export default function ContentTypesPage() {
                   <td className="border px-4 py-2">
                     <ul className="list-disc pl-5">
                       {ct.fields.map((f, i) => (
-                        <li key={i}>
-                          {f.name} ({f.type}
+                        <li
+                          key={i}
+                          className={f.required ? `text-red-500` : ""}
+                        >
+                          {f.name} (
+                          {f.type == "string" ? "text" : f.type || f.kind}
                           {f.required ? ", required" : ""})
                         </li>
                       ))}
@@ -128,9 +133,11 @@ export default function ContentTypesPage() {
                   <td className="border px-4 py-2">
                     <Link
                       href={`/admin/contenttypes/edit/${ct.slug}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-white hover:underline"
                     >
-                      Edit
+                      <button className="bg-amber-500 py-2 px-3 rounded text-white font-semibold">
+                        Edit
+                      </button>
                     </Link>
                   </td>
                 </tr>

@@ -36,6 +36,12 @@ export const pageMappings = [
     roles: ["admin", "editor", "superuser"],
   },
   {
+    name: "Data Sources",
+    path: "/admin/datasources",
+    icon: "FaPlug",
+    roles: ["admin", "editor", "superuser"],
+  },
+  {
     name: "Themes",
     path: "/admin/themes",
     icon: "FaPaintBrush",
