@@ -4,7 +4,11 @@ export interface SecretDoc {
   _id: Types.ObjectId;
   name: string; // e.g. "Stripe API Key"
   slug: string; // e.g. "stripe-api-key"
-  value: string; // encrypted at rest
+  value: {
+    iv: string;
+    content: string;
+    tag: string;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -13,9 +17,12 @@ export const SecretSchema = new Schema<SecretDoc>(
   {
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true, index: true },
-    value: { type: String, required: true },
+    value: {
+      type: Schema.Types.Mixed,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export function getOrCreateSecretModel(conn: Connection | any) {

@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { safeJsonParse } from "@/utils/safeJSONParse";
 import KeyValueEditor from "@/components/admin/KeyValueEditor";
 import { CONTENT_TYPES } from "@/constants/contentTypes";
+import { ContentType } from "@/lib/types/types";
+import SchemaJsonPreview from "./SchemaJsonPreview";
+
+import { slugify } from "@/lib/helperFunctions";
 
 export type HttpMethod =
   | "GET"
@@ -15,14 +19,15 @@ export type HttpMethod =
   | "OPTIONS";
 
 export interface EndpointForm {
-  _id: string;
+  _id?: string;
   name: string;
+  slug: string;
   method: HttpMethod;
   path: string;
   contentType?: string;
   headers: Record<string, string>;
   queryParams: Record<string, any>;
-  bodyTemplate?: any;
+  bodyTemplate?: string | undefined;
 }
 
 interface EndpointModalProps {
@@ -30,6 +35,7 @@ interface EndpointModalProps {
   onClose: () => void;
   onSave: (data: EndpointForm) => Promise<void> | void;
 
+  parentDataSource: string;
   initialData?: EndpointForm; // ← presence = edit mode
 }
 
@@ -37,6 +43,7 @@ export default function EndpointModal({
   open,
   onClose,
   onSave,
+  parentDataSource,
   initialData,
 }: EndpointModalProps) {
   const isEdit = !!initialData;
@@ -48,20 +55,35 @@ export default function EndpointModal({
 
   const [form, setForm] = useState<EndpointForm>({
     name: "",
+    slug: "",
     method: "GET",
     path: "",
     contentType: "",
     headers: {},
     queryParams: {},
-    bodyTemplate: {},
+    bodyTemplate: "",
   });
 
+  const [contentTypes, SetContentTypes] = useState<ContentType[]>([]);
+  const [activeContentType, SetActiveContentType] = useState<string | null>(
+    null,
+  );
+
   /* ----------------------------- Init ----------------------------- */
+
+  async function GetContentTypes() {
+    fetch(`/api/cms/contenttypes?page=1&limit=1000`).then(async (res) => {
+      const data = await res.json();
+      SetContentTypes(data.items);
+    });
+  }
 
   useEffect(() => {
     if (initialData) {
       setForm(initialData);
+      SetActiveContentType(initialData.bodyTemplate || null);
     }
+    GetContentTypes();
   }, [initialData]);
 
   if (!open) return null;
@@ -120,7 +142,22 @@ export default function EndpointModal({
                 <input
                   className="w-full border px-3 py-2 rounded"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      slug: slugify(parentDataSource + "-" + e.target.value),
+                      name: e.target.value,
+                    })
+                  }
+                />
+                <label className="block font-medium mb-1">Slug</label>
+                <input
+                  className={`w-full border px-3 py-2 rounded ${isEdit ? "bg-gray-200" : ""}`}
+                  disabled={isEdit}
+                  value={form.slug}
+                  onChange={(e) =>
+                    setForm({ ...form, slug: slugify(e.target.value) })
+                  }
                 />
               </div>
 
@@ -214,18 +251,37 @@ export default function EndpointModal({
           {/* ---------------- Body ---------------- */}
           {activeTab === "body" && (
             <div>
-              <label className="block font-medium mb-1">
-                Body Template (JSON)
-              </label>
-              <textarea
-                className="w-full border px-3 py-2 rounded font-mono text-sm h-48"
-                value={JSON.stringify(form.bodyTemplate ?? {}, null, 2)}
-                onChange={(e) =>
+              <label className="block font-medium mb-1">Content Type</label>
+              <select
+                className="w-full border px-3 py-2 rounded font-mono text-sm"
+                defaultValue={activeContentType || ""}
+                onChange={(e) => {
                   setForm({
                     ...form,
-                    bodyTemplate: safeJsonParse(e.target.value),
-                  })
+                    bodyTemplate:
+                      e.target.value != ""
+                        ? safeJsonParse(e.target.value)
+                        : undefined,
+                  });
+                  SetActiveContentType(e.target.value);
+                }}
+              >
+                <option value={""}>--None--</option>
+                {contentTypes.map((contentType) => {
+                  return (
+                    <option key={contentType.slug} value={contentType._id}>
+                      {contentType.name}
+                    </option>
+                  );
+                })}
+              </select>
+              <SchemaJsonPreview
+                fields={
+                  contentTypes.filter((contentType) => {
+                    return contentType._id == activeContentType;
+                  })[0]?.fields || []
                 }
+                title="Content Type Preview"
               />
             </div>
           )}

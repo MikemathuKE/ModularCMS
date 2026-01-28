@@ -12,13 +12,14 @@ export type HttpMethod =
 
 export interface IDataSourceEndpoint extends Document {
   name: string;
+  slug: string;
   dataSource: Types.ObjectId;
   path: string; // path relative to baseUrl
   method: HttpMethod;
   headers?: Record<string, string>;
   contentType?: Types.ObjectId; // ← VERY IMPORTANT
   queryParams?: Record<string, any>;
-  bodyTemplate?: any;
+  bodyTemplate?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,7 @@ export interface IDataSourceEndpoint extends Document {
 const DataSourceEndpointSchema = new Schema<IDataSourceEndpoint>(
   {
     name: { type: String, required: true },
+    slug: { type: String, required: true },
     dataSource: {
       type: Schema.Types.ObjectId,
       ref: "DataSource",
@@ -40,9 +42,9 @@ const DataSourceEndpointSchema = new Schema<IDataSourceEndpoint>(
     contentType: { type: String },
     headers: { type: Schema.Types.Mixed, default: {} },
     queryParams: { type: Schema.Types.Mixed, default: {} },
-    bodyTemplate: { type: Schema.Types.Mixed },
+    bodyTemplate: { type: Schema.Types.ObjectId, ref: "ContentTypes" },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export function getOrCreateDataSourceEndpointsModel(conn: Connection | any) {

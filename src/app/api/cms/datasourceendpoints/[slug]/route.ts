@@ -1,10 +1,9 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/lib/mongodb";
-import { GetTenantSlug } from "@/utils/getTenantSlug";
+import { getOrCreateDataSourceEndpointsModel } from "@/models/DataSourceEndpoint";
 import { getTenantConnection } from "@/lib/mongodb";
-import { getOrCreateContentTypeModel } from "@/models/ContentType";
+import { GetTenantSlug } from "@/utils/getTenantSlug";
 
-// --- GET a single content type by slug ---
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
@@ -14,22 +13,22 @@ export async function GET(
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
-    return NextResponse.json({ error: "Tenant missing" }, { status: 400 });
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
 
   const tenantConn = await getTenantConnection(tenantSlug);
-  const ContentType = getOrCreateContentTypeModel(tenantConn);
+  const DataSourceEndpoint = getOrCreateDataSourceEndpointsModel(tenantConn);
 
-  const type = await ContentType.findOne({ slug });
-  if (!type) {
+  const doc = await DataSourceEndpoint.findOne({ slug })
+    .populate("dataSource")
+    .populate("bodyTemplate");
+  if (!doc)
     return NextResponse.json(
-      { error: "Content type not found" },
+      { error: "Unknown Data Source Endpoint!" },
       { status: 404 },
     );
-  }
-  return NextResponse.json(type);
+  return NextResponse.json(doc);
 }
 
-// --- UPDATE a content type by slug ---
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
@@ -37,15 +36,15 @@ export async function PUT(
   const { slug } = await params;
 
   await dbConnect();
-  const body = await req.json();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
-    return NextResponse.json({ error: "Tenant missing" }, { status: 400 });
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
 
   const tenantConn = await getTenantConnection(tenantSlug);
-  const ContentType = getOrCreateContentTypeModel(tenantConn);
+  const DataSourceEndpoint = getOrCreateDataSourceEndpointsModel(tenantConn);
 
-  const updated = await ContentType.findOneAndUpdate(
+  const body = await req.json();
+  const updated = await DataSourceEndpoint.findOneAndUpdate(
     { slug },
     {
       ...body,
@@ -64,7 +63,6 @@ export async function PUT(
   return NextResponse.json(updated);
 }
 
-// --- DELETE a content type by slug ---
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
@@ -74,18 +72,11 @@ export async function DELETE(
   await dbConnect();
   const tenantSlug = await GetTenantSlug(req.headers.get("host"));
   if (!tenantSlug)
-    return NextResponse.json({ error: "Tenant missing" }, { status: 400 });
+    return Response.json({ error: "Tenant missing" }, { status: 400 });
 
   const tenantConn = await getTenantConnection(tenantSlug);
-  const ContentType = getOrCreateContentTypeModel(tenantConn);
+  const DataSourceEndpoint = getOrCreateDataSourceEndpointsModel(tenantConn);
 
-  const deleted = await ContentType.findOneAndDelete({ slug });
-  if (!deleted) {
-    return NextResponse.json(
-      { error: "Content type not found" },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json({ success: true });
+  await DataSourceEndpoint.findOneAndDelete({ slug });
+  return NextResponse.json({ ok: true });
 }

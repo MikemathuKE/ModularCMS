@@ -28,7 +28,7 @@ export default function KeyValueEditor({
       key,
       value: String(val),
     }));
-    setRows(initialRows);
+    if (initialRows.length > 0) setRows(initialRows);
   }, [value]);
 
   function updateParent(updatedRows: KVRow[]) {

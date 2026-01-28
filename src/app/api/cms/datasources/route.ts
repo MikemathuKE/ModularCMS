@@ -28,10 +28,6 @@ export async function GET(req: Request) {
   const tenantConn = await getTenantConnection(tenantSlug);
   const DataSourceModel = getOrCreateDataSourceModel(tenantConn);
 
-  console.log(tenantSlug);
-  console.log(skip);
-  console.log(limit);
-
   const [items, total] = await Promise.all([
     DataSourceModel.find(query).skip(skip).limit(limit).sort({ updatedAt: -1 }),
     DataSourceModel.countDocuments(query),

@@ -132,7 +132,7 @@ export default function LayoutEditor({
 
   const [reparentMode, setReparentMode] = useState(false);
   const [nodeToReparentPath, setNodeToReparentPath] = useState<number[] | null>(
-    null
+    null,
   );
 
   // 🟢 NEW: Track the node currently being dragged
@@ -148,7 +148,7 @@ export default function LayoutEditor({
   const copyNodeToPath = (
     sourcePath: number[],
     targetPath: number[],
-    position: "above" | "below" | "inside" = "below"
+    position: "above" | "below" | "inside" = "below",
   ) => {
     if (sourcePath.join("-") === targetPath.join("-")) return;
 
@@ -162,7 +162,7 @@ export default function LayoutEditor({
 
     // Remove it from the source first
     const newSourceChildren = sourceParent.children.filter(
-      (_, i) => i !== sourceIndex
+      (_, i) => i !== sourceIndex,
     );
     updateNodeAtPath(sourceParentPath, {
       ...sourceParent,
@@ -184,15 +184,14 @@ export default function LayoutEditor({
         if ("props" in node) node.props = { ...node.props, id: uuidv4() };
         const children = node.children?.map(
           (child: string | number | JSONNode | null) =>
-            recursiveIdUpdate(child as JSONNode)
+            recursiveIdUpdate(child as JSONNode),
         );
         return { ...node, children };
       };
       const newNode = recursiveIdUpdate(
-        structuredClone(movingNode as JSONNode)
+        structuredClone(movingNode as JSONNode),
       );
       const updatedChildren = [...(targetNode.children || []), newNode];
-      console.log(newNode);
 
       updateNodeAtPath(targetPath, {
         ...targetNode,
@@ -276,7 +275,7 @@ export default function LayoutEditor({
         (child: string | number | JSONNode | null, i: number) =>
           i === index
             ? recursiveUpdate({ ...(child as JSONNode) }, rest)
-            : child
+            : child,
       );
       return { ...node, children };
     };
@@ -294,8 +293,6 @@ export default function LayoutEditor({
       props: newProps,
       children: [],
     };
-    console.log(meta.props);
-    console.log(newChild);
     const node = getNodeAtPath(selectedNodePath);
     if (!node) return;
     const children = [...(node.children || []), newChild];
@@ -349,12 +346,12 @@ export default function LayoutEditor({
         props: { ...(node.props || {}), [propName]: value },
       });
     }, 3000),
-    [selectedNodePath]
+    [selectedNodePath],
   );
 
   const updateProp = (
     propName: string,
-    value: string | number | CSSProperties | null | boolean
+    value: string | number | CSSProperties | null | boolean,
   ) => {
     const node = getNodeAtPath(selectedNodePath);
     if (!node) return;
@@ -380,12 +377,13 @@ export default function LayoutEditor({
             selectedNodePath.join("-") === path.join("-")
               ? "bg-blue-100"
               : dragOverPath && dragOverPath.join("-") === path.join("-")
-              ? "bg-green-100"
-              : draggingPath && draggingPath.join("-") === path.join("-")
-              ? "bg-yellow-100"
-              : reparentMode && nodeToReparentPath?.join("-") === path.join("-")
-              ? "bg-amber-100"
-              : "hover:bg-gray-100"
+                ? "bg-green-100"
+                : draggingPath && draggingPath.join("-") === path.join("-")
+                  ? "bg-yellow-100"
+                  : reparentMode &&
+                      nodeToReparentPath?.join("-") === path.join("-")
+                    ? "bg-amber-100"
+                    : "hover:bg-gray-100"
           }`}
           onClick={() => {
             setSelectedNodePath(path);
@@ -479,7 +477,7 @@ export default function LayoutEditor({
         </div>
         {!isCollapsed &&
           node.children?.map((child, i) =>
-            renderTree(child as JSONNode, [...path, i])
+            renderTree(child as JSONNode, [...path, i]),
           )}
       </div>
     );
@@ -489,7 +487,7 @@ export default function LayoutEditor({
     propName: string,
     value: string | number | boolean | object,
     propType: string,
-    required = false
+    required = false,
   ) => {
     const type = typeof value;
     return (
@@ -753,7 +751,7 @@ export default function LayoutEditor({
                       structuredClone(rootNode),
                       undefined,
                       true,
-                      selectedNodeId
+                      selectedNodeId,
                     )}
                   </Info>
                 </Main>
@@ -768,14 +766,14 @@ export default function LayoutEditor({
           {selectedNode ? (
             <div className="flex flex-col gap-2 w-full h-full overflow-y-auto">
               {Object.entries(
-                MetaComponentMap[selectedNode.component]?.props || {}
+                MetaComponentMap[selectedNode.component]?.props || {},
               ).map(([name, def]) =>
                 renderPropInput(
                   name,
                   selectedNode.props?.[name] ?? def,
                   selectedNode.component,
-                  false
-                )
+                  false,
+                ),
               )}
 
               <div>

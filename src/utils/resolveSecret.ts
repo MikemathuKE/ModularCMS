@@ -3,13 +3,19 @@ import { getTenantConnection } from "@/lib/mongodb";
 import { GetTenantSlug } from "@/utils/getTenantSlug";
 import { getOrCreateSecretModel } from "@/models/Secret";
 
+interface SecretValue {
+  iv: string;
+  content: string;
+  tag: string;
+}
+
 /**
  * Resolves a secret reference (slug) into its actual value
  */
 export async function resolveSecret(
   secretRef?: string,
-  req?: Request
-): Promise<string | undefined> {
+  req?: Request,
+): Promise<SecretValue | undefined> {
   if (!secretRef) return undefined;
 
   if (!req) {

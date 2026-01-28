@@ -2,38 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import EndpointModal, { EndpointForm } from "@/components/admin/EndpointModal";
+import TestEndpointModal from "@/components/admin/TestEndpointModal";
 
-/* ----------------------------- Types ----------------------------- */
-
-type AuthType = "none" | "apiKey" | "bearer" | "basic" | "oauth2";
-
-interface DataSourceForm {
-  name: string;
-  slug: string;
-  baseUrl: string;
-  defaultHeaders: Record<string, string>;
-  auth: {
-    type: AuthType;
-    apiKeyName?: string;
-    apiKeyIn?: "header" | "query";
-    secretRef?: string;
-    usernameRef?: string;
-    passwordRef?: string;
-  };
-}
-
-/* ----------------------------- Helpers ----------------------------- */
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-}
-
-/* ----------------------------- Component ----------------------------- */
+import { slugify } from "@/lib/helperFunctions";
+import { DataSourceForm } from "@/lib/types/types";
+import SecretCreator from "@/components/admin/SecretCreator";
+import SecretSelect from "@/components/admin/SecretSelect";
 
 export default function DataSourceEditorPage() {
   const params = useParams();
@@ -44,18 +19,24 @@ export default function DataSourceEditorPage() {
   const [loading, setLoading] = useState(!isCreate);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "auth" | "endpoints">(
-    "general"
+    "general",
   );
 
+  const [secrets, setSecrets] = useState<Secret[]>([]);
+  const [loadingSecrets, setLoadingSecrets] = useState(false);
+
   const [dataSourceId, setDataSourceId] = useState<string | null>(null);
+  const [dataSourceSlug, setDataSourceSlug] = useState<string | null>(null);
   const [endpointPage, setEndpointPage] = useState<number>(1);
   const [endpointLimit, setEndpointLimit] = useState<number>(10);
   const [endpointSearch, setEndpointSearch] = useState<string>("");
 
   const [endpointModalOpen, setEndpointModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EndpointForm | null>(
-    null
+    null,
   );
+  const [endpointTestModalOpen, setEndpointTestModalOpen] = useState(false);
+  const [testEndpointId, setTestEndpointId] = useState<string>("");
 
   const [form, setForm] = useState<DataSourceForm>({
     name: "",
@@ -67,7 +48,22 @@ export default function DataSourceEditorPage() {
 
   const [endpoints, setEndpoints] = useState<EndpointForm[]>([]);
 
-  /* ----------------------------- Fetch (Edit) ----------------------------- */
+  useEffect(() => {
+    async function loadSecrets() {
+      setLoadingSecrets(true);
+      try {
+        const res = await fetch("/api/cms/secrets");
+        const data = await res.json();
+        setSecrets(data.data || []);
+      } catch (err) {
+        console.error("Failed to load secrets", err);
+      } finally {
+        setLoadingSecrets(false);
+      }
+    }
+
+    loadSecrets();
+  }, []);
 
   useEffect(() => {
     if (isCreate) return;
@@ -85,6 +81,7 @@ export default function DataSourceEditorPage() {
           auth: json.auth || { type: "none" },
         });
         setDataSourceId(json._id);
+        setDataSourceSlug(json.slug);
         refreshEndpoints(json._id);
       } catch (err) {
         console.error("Failed to load datasource", err);
@@ -100,7 +97,7 @@ export default function DataSourceEditorPage() {
     const res = await fetch(
       `/api/cms/datasourceendpoints?dataSourceId=${
         id || dataSourceId
-      }&page=${endpointPage}&limit=${endpointLimit}&search=${endpointSearch}`
+      }&page=${endpointPage}&limit=${endpointLimit}&search=${endpointSearch}`,
     );
     const json = await res.json();
 
@@ -121,14 +118,14 @@ export default function DataSourceEditorPage() {
           method: isCreate ? "POST" : "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
-        }
+        },
       );
 
       const json = await res.json();
 
       if (isCreate) {
         setDataSourceId(json.data._id);
-        router.replace(`/admin/datasources/${json.data._id}`);
+        router.push(`/admin/datasources/${json.data.slug}`);
       }
     } catch (err) {
       console.error("Save failed", err);
@@ -146,11 +143,12 @@ export default function DataSourceEditorPage() {
         <EndpointModal
           open={endpointModalOpen}
           initialData={editingEndpoint ?? undefined}
+          parentDataSource={dataSourceSlug || ""}
           onClose={() => setEndpointModalOpen(false)}
           onSave={async (data) => {
             await fetch(
               editingEndpoint
-                ? `/api/cms/datasourceendpoints/${editingEndpoint._id}`
+                ? `/api/cms/datasourceendpoints/${editingEndpoint.slug}`
                 : `/api/cms/datasourceendpoints`,
               {
                 method: editingEndpoint ? "PUT" : "POST",
@@ -159,13 +157,25 @@ export default function DataSourceEditorPage() {
                   ...data,
                   dataSource: dataSourceId,
                 }),
-              }
+              },
             );
 
             // refetch endpoints here
             refreshEndpoints();
           }}
         />
+
+        {/* Test Endpoint Modal */}
+        {endpointTestModalOpen && (
+          <TestEndpointModal
+            open={true}
+            slugId={testEndpointId}
+            onClose={() => {
+              setEndpointTestModalOpen(false);
+              setTestEndpointId("");
+            }}
+          />
+        )}
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -245,8 +255,10 @@ export default function DataSourceEditorPage() {
         )}
 
         {/* -------------------- Auth -------------------- */}
+        {/* -------------------- Auth -------------------- */}
         {activeTab === "auth" && (
           <div className="space-y-4 max-w-xl">
+            {/* Auth Type */}
             <div>
               <label className="block font-medium mb-1">Auth Type</label>
               <select
@@ -267,11 +279,12 @@ export default function DataSourceEditorPage() {
               </select>
             </div>
 
+            {/* ---------- API KEY ---------- */}
             {form.auth.type === "apiKey" && (
-              <>
+              <div className="space-y-3">
                 <input
                   className="w-full border px-3 py-2 rounded"
-                  placeholder="API Key Name"
+                  placeholder="API Key Name (e.g. x-api-key)"
                   value={form.auth.apiKeyName || ""}
                   onChange={(e) =>
                     setForm({
@@ -298,59 +311,104 @@ export default function DataSourceEditorPage() {
                   <option value="query">Query</option>
                 </select>
 
-                <input
-                  className="w-full border px-3 py-2 rounded"
-                  placeholder="Secret Reference"
-                  value={form.auth.secretRef || ""}
-                  onChange={(e) =>
+                <div>
+                  <label className="text-sm mb-1 block">API Key Secret</label>
+                  <SecretSelect
+                    value={form.auth.secretRef}
+                    secrets={secrets}
+                    onChange={(slug) =>
+                      setForm({
+                        ...form,
+                        auth: { ...form.auth, secretRef: slug },
+                      })
+                    }
+                  />
+                </div>
+
+                <SecretCreator
+                  onCreated={(s) => {
+                    setSecrets([...secrets, s]);
                     setForm({
                       ...form,
-                      auth: { ...form.auth, secretRef: e.target.value },
-                    })
-                  }
+                      auth: { ...form.auth, secretRef: s.slug },
+                    });
+                  }}
                 />
-              </>
+              </div>
             )}
 
-            {form.auth.type === "basic" && (
-              <>
-                <input
-                  className="w-full border px-3 py-2 rounded"
-                  placeholder="Username Secret"
-                  value={form.auth.usernameRef || ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      auth: { ...form.auth, usernameRef: e.target.value },
-                    })
-                  }
-                />
-                <input
-                  className="w-full border px-3 py-2 rounded"
-                  placeholder="Password Secret"
-                  value={form.auth.passwordRef || ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      auth: { ...form.auth, passwordRef: e.target.value },
-                    })
-                  }
-                />
-              </>
-            )}
-
+            {/* ---------- BEARER ---------- */}
             {form.auth.type === "bearer" && (
-              <input
-                className="w-full border px-3 py-2 rounded"
-                placeholder="Token Secret"
-                value={form.auth.secretRef || ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    auth: { ...form.auth, secretRef: e.target.value },
-                  })
-                }
-              />
+              <div className="space-y-3">
+                <label className="text-sm">Bearer Token Secret</label>
+
+                <SecretSelect
+                  value={form.auth.secretRef}
+                  secrets={secrets}
+                  onChange={(slug) =>
+                    setForm({
+                      ...form,
+                      auth: { ...form.auth, secretRef: slug },
+                    })
+                  }
+                />
+
+                <SecretCreator
+                  onCreated={(s) => {
+                    setSecrets([...secrets, s]);
+                    setForm({
+                      ...form,
+                      auth: { ...form.auth, secretRef: s.slug },
+                    });
+                  }}
+                />
+              </div>
+            )}
+
+            {/* ---------- BASIC ---------- */}
+            {form.auth.type === "basic" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm mb-1 block">Username Secret</label>
+                  <SecretSelect
+                    value={form.auth.usernameRef}
+                    secrets={secrets}
+                    onChange={(slug) =>
+                      setForm({
+                        ...form,
+                        auth: { ...form.auth, usernameRef: slug },
+                      })
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm mb-1 block">Password Secret</label>
+                  <SecretSelect
+                    value={form.auth.passwordRef}
+                    secrets={secrets}
+                    onChange={(slug) =>
+                      setForm({
+                        ...form,
+                        auth: { ...form.auth, passwordRef: slug },
+                      })
+                    }
+                  />
+                </div>
+
+                <SecretCreator
+                  onCreated={(s) => {
+                    setSecrets([...secrets, s]);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* OAuth2 placeholder (future) */}
+            {form.auth.type === "oauth2" && (
+              <p className="text-sm text-gray-500">
+                OAuth2 configuration coming soon.
+              </p>
             )}
           </div>
         )}
@@ -391,13 +449,22 @@ export default function DataSourceEditorPage() {
                     </td>
                     <td className="border px-3 py-2">
                       <button
-                        className="px-2 py-1 bg-gray-200 rounded"
+                        className="px-2 py-1 bg-amber-100 border rounded"
                         onClick={() => {
                           setEditingEndpoint(ep);
                           setEndpointModalOpen(true);
                         }}
                       >
                         Edit
+                      </button>
+                      <button
+                        className="px-2 ml-2 py-1 bg-green-100 border rounded"
+                        onClick={() => {
+                          setTestEndpointId(ep.slug);
+                          setEndpointTestModalOpen(true);
+                        }}
+                      >
+                        Test
                       </button>
                     </td>
                   </tr>

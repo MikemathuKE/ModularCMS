@@ -74,6 +74,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
   }
 
+  if (body.bodyTemplate == "") {
+    delete body.bodyTemplate;
+  }
+
   const created = await Endpoint.create(body);
   return NextResponse.json(created);
 }

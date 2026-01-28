@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-interface ContentType {
-  _id: string;
-  name: string;
-  slug: string;
-  fields: { name: string; type: string; required: boolean }[];
-}
+import { ContentType } from "@/lib/types/types";
 
 export default function ContentPage() {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
@@ -19,7 +13,7 @@ export default function ContentPage() {
     async function fetchTypes() {
       setLoading(true);
       const res = await fetch(
-        `/api/cms/contenttypes?search=${encodeURIComponent(search)}`
+        `/api/cms/contenttypes?search=${encodeURIComponent(search)}`,
       );
       const data = await res.json();
       setContentTypes(data.items || []);
